@@ -94,4 +94,3 @@ def page_header(title, subtitle):
     st.markdown(
         f'<div class="page-header"><h2>{title}</h2><p>{subtitle}</p></div>',
         unsafe_allow_html=True,
-    )
