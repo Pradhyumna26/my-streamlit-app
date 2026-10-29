@@ -1,7 +1,7 @@
-## Royal Event Budget Calculator (business idea: Event Management)
+## Event Budget Calculator (business idea: Event Management)
 ## Run with: streamlit run app.py
 ## Needs Python 3.10 or newer (match-case is used) and a recent Streamlit: pip install --upgrade streamlit
-## The app has a TOP menu bar (like the Streamlit Playground site) with 5 pages:
+## The app has a TOP menu bar (Apple-style black bar) with 5 pages:
 ##   Calculator, Price List, Expenses, Saved and Profile
 
 
@@ -58,13 +58,8 @@ event_times = ["Morning", "Afternoon", "Evening"]
 mobile_start_digits = ["6", "7", "8", "9"]
 planning_keywords = ["music", "band", "flower", "stage", "fireworks", "photo"]
 
-## The menu links shown in the top bar (the Profile button sits on the right side of the bar)
-nav_pages = {
-    "Calculator": "🧮",
-    "Price List": "📜",
-    "Expenses": "💰",
-    "Saved": "💾",
-}
+## The menu links shown in the top bar (the Profile icon sits on the right side of the bar)
+nav_pages = ["Calculator", "Price List", "Expenses", "Saved"]
 
 
 ## ---------------------------------------------------------------
@@ -89,12 +84,12 @@ def format_money(amount):
     return f"{sign}₹{whole}.{decimals}"
 
 
-## Show a section heading with a gold bar on the left
+## Show a section heading with a royal-blue bar on the left
 def section_title(text):
     st.markdown(f'<div class="section-title">{text}</div>', unsafe_allow_html=True)
 
 
-## Show the title of a page (used on every page except the Calculator, which has the big banner)
+## Show the title of a page (used on every page except the Calculator, which has the big hero)
 def page_header(title, subtitle):
     st.markdown(
         f'<div class="page-header"><h2>{title}</h2><p>{subtitle}</p></div>',
@@ -178,138 +173,113 @@ def delete_expense(expense_id):
 
 
 ## ---------------------------------------------------------------
-## 3. PAGE SETUP AND ROYAL THEME DESIGN
+## 3. PAGE SETUP AND GREY + ROYAL BLUE THEME
 ## ---------------------------------------------------------------
-## Colours used: midnight violet #0a0714 (page), deep amethyst #140d26 (cards),
-## royal purple #5b2fb5 (accent), antique gold #d4af37 (highlights), ivory #f3ecff (text)
+## Colours used: black #000000 (page), graphite #111113 and #1c1c1e (cards, inputs),
+## silver greys (text), royal blue #2e5bff (buttons, highlights)
 
 ## Page title and icon shown in the browser tab
-st.set_page_config(page_title="Royal Event Budget Calculator", page_icon="👑", layout="wide")
+st.set_page_config(page_title="Event Budget Calculator", page_icon="👑", layout="wide")
 
-## Royal theme (CSS): colours, fonts, cards, inputs, buttons, tables, avatar and the fixed top menu bar
+## Grey and royal-blue theme (CSS): colours, fonts, cards, inputs, buttons, tables, avatar and the fixed top menu bar
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cinzel:wght@500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-    html, body, .stApp, .stApp * { font-family: 'Inter', 'Segoe UI', sans-serif; }
+    html, body, .stApp, .stApp * { font-family: 'Inter', -apple-system, 'SF Pro Display', 'Segoe UI', sans-serif; }
+    .stApp { color-scheme: dark; }
 
     /* Hide the default Streamlit header, menu and footer (our own top bar replaces them) */
     #MainMenu, footer { visibility: hidden; }
     header[data-testid="stHeader"], [data-testid="stToolbar"], [data-testid="stDecoration"] { display: none !important; }
 
-    /* Page background and space at the top so the fixed menu bar never hides content */
+    /* Page background: pure black with a soft royal-blue glow at the top */
     .stApp {
-        background-color: #0a0714;
-        background-image:
-            radial-gradient(ellipse at 15% -10%, rgba(91,47,181,0.28) 0%, transparent 50%),
-            radial-gradient(ellipse at 90% 0%, rgba(212,175,55,0.08) 0%, transparent 40%);
+        background-color: #000000;
+        background-image: radial-gradient(ellipse at 50% 0%, rgba(46,91,255,0.20) 0%, transparent 55%);
     }
-    .block-container { max-width: 1000px; padding-top: 6.5rem !important; padding-bottom: 4rem !important; }
+    .block-container { max-width: 1000px; padding-top: 8rem !important; padding-bottom: 4rem !important; }
 
-    /* Headings use a classic royal serif, body text stays clean */
-    .stApp h1, .stApp h2, .stApp h3, .stApp h4 { color: #f3ecff; font-family: 'Cinzel', Georgia, serif; }
+    /* Headings: clean, bold, tight spacing */
+    .stApp h1, .stApp h2, .stApp h3, .stApp h4 { color: #f5f5f7; letter-spacing: -0.02em; }
 
-    /* All normal text (light on dark) */
+    /* All normal text (light grey on black) */
     .stApp p, .stApp label, .stApp span, .stApp li,
-    .stApp [data-testid="stMarkdownContainer"] p { color: #cfc6ee; }
-    .stApp [data-testid="stWidgetLabel"] p { font-weight: 500; color: #f3ecff; }
-    .stApp [data-testid="stCaptionContainer"] p { color: #9a8fc0; font-size: 0.8rem; }
-    .stApp [data-testid="stTooltipIcon"] svg { color: #b3a8d6; }
-    .stApp hr { border-color: #2c1f4d; }
+    .stApp [data-testid="stMarkdownContainer"] p { color: #c7c7cc; }
+    .stApp [data-testid="stWidgetLabel"] p { font-weight: 500; color: #f5f5f7; }
+    .stApp [data-testid="stCaptionContainer"] p { color: #86868b; font-size: 0.82rem; }
+    .stApp [data-testid="stTooltipIcon"] svg { color: #98989d; }
+    .stApp hr { border-color: #2c2c30; }
 
-    /* ---------- TOP MENU BAR (fixed, like the Streamlit Playground site) ---------- */
+    /* ---------- TOP MENU BAR (black, fixed, evenly spaced links) + PROMO STRIP ---------- */
     .st-key-topnav {
         position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-        background: rgba(10,7,20,0.94); backdrop-filter: blur(10px);
-        border-bottom: 1px solid rgba(212,175,55,0.35);
-        padding: 8px max(14px, calc((100vw - 1000px) / 2));
-        box-shadow: 0 6px 28px rgba(0,0,0,0.5);
+        gap: 0 !important; padding: 0;
+        background: rgba(0,0,0,0.88); backdrop-filter: saturate(180%) blur(20px);
     }
     .st-key-topnav [data-testid="stHorizontalBlock"] {
         flex-direction: row !important; flex-wrap: nowrap !important; align-items: center;
-        gap: 4px; overflow-x: auto; scrollbar-width: none;
+        gap: 0; padding: 0 max(8px, calc((100vw - 980px) / 2));
+        overflow-x: auto; scrollbar-width: none;
     }
     .st-key-topnav [data-testid="stHorizontalBlock"]::-webkit-scrollbar { display: none; }
     .st-key-topnav [data-testid="stColumn"] {
-        flex: 0 0 auto !important; width: auto !important; min-width: 0 !important;
-    }
-    /* The empty 6th column pushes the Profile button to the far right */
-    .st-key-topnav [data-testid="stColumn"]:nth-child(6) { flex: 1 1 auto !important; }
-
-    /* Brand: crown + name on the left */
-    .brand { display: flex; align-items: center; gap: 10px; padding-right: 22px; white-space: nowrap; }
-    .brand-crown {
-        width: 36px; height: 36px; border-radius: 10px; font-size: 1.15rem;
-        display: flex; align-items: center; justify-content: center;
-        background: linear-gradient(135deg, #5b2fb5, #8b5cf6);
-        border: 1px solid rgba(212,175,55,0.6);
-        box-shadow: 0 0 14px rgba(139,92,246,0.5);
-    }
-    .brand-text {
-        font-family: 'Cinzel', Georgia, serif; font-weight: 700; font-size: 1.15rem;
-        letter-spacing: 1px; color: #f3d98b;
+        flex: 1 1 0 !important; width: auto !important; min-width: max-content !important;
     }
 
-    /* Menu links: plain text, the open page gets a gold underline */
+    /* Crown logo on the left */
+    .brand { display: flex; align-items: center; justify-content: center; height: 100%; padding: 0 10px; }
+    .brand svg { fill: #f5f5f7; }
+
+    /* Menu links: small grey text, white when hovered, royal-blue line under the open page */
     .st-key-topnav div.stButton > button {
-        background: transparent; box-shadow: none; transform: none;
+        background: transparent; box-shadow: none; transform: none; width: 100%;
         border: none; border-bottom: 2px solid transparent; border-radius: 0;
-        padding: 0.65rem 0.95rem; width: auto; white-space: nowrap;
-        color: #cfc6ee; font-size: 0.92rem;
+        padding: 0.95rem 0.7rem; white-space: nowrap; color: #d2d2d7; font-size: 0.86rem;
     }
-    .st-key-topnav div.stButton > button p { color: inherit !important; font-weight: 500; white-space: nowrap; }
-    .st-key-topnav div.stButton > button:hover {
-        background: rgba(212,175,55,0.08); color: #f3d98b; transform: none; box-shadow: none;
-    }
+    .st-key-topnav div.stButton > button p { color: inherit !important; font-weight: 500; white-space: nowrap; font-size: 0.86rem; }
+    .st-key-topnav div.stButton > button:hover { background: transparent; color: #ffffff; box-shadow: none; transform: none; }
     .st-key-topnav div.stButton > button[data-testid="stBaseButton-primary"],
     .st-key-topnav div.stButton > button[kind="primary"] {
-        background: rgba(212,175,55,0.10); color: #f3d98b; border-bottom: 2px solid #d4af37;
+        background: transparent; color: #ffffff; border-bottom: 2px solid #2e5bff;
     }
     .st-key-topnav div.stButton > button[data-testid="stBaseButton-primary"] p,
     .st-key-topnav div.stButton > button[kind="primary"] p { font-weight: 700; }
+    .st-key-nav_Profile div.stButton > button p { font-size: 1.05rem; }
 
-    /* Profile button on the right: gold outline, like the Free / Pro buttons in the sample */
-    .st-key-nav_Profile div.stButton > button {
-        border: 1px solid rgba(212,175,55,0.7) !important; border-radius: 10px !important;
-        color: #f3d98b; padding: 0.5rem 1.1rem;
+    /* Promo strip under the menu bar */
+    .promo {
+        background: #1d1d1f; text-align: center; padding: 14px 16px;
+        font-size: 0.95rem; line-height: 1.35; color: #f5f5f7;
     }
-    .st-key-nav_Profile div.stButton > button[data-testid="stBaseButton-primary"],
-    .st-key-nav_Profile div.stButton > button[kind="primary"] {
-        background: linear-gradient(135deg, #f3d98b, #d4af37 55%, #b8901f) !important;
-        color: #1a1033 !important; border: 1px solid #f3d98b !important;
-    }
+    .stApp .promo, .stApp .promo span { color: #f5f5f7; }
+    .stApp .promo b { color: #7a9bff; font-weight: 600; }
 
-    /* ---------- BANNER AND HEADINGS ---------- */
-    .hero {
-        background: linear-gradient(135deg, #140a33 0%, #3b1d82 55%, #6d3fd1 100%);
-        padding: 40px 24px; border-radius: 18px; text-align: center;
-        margin-bottom: 26px; border: 1px solid rgba(212,175,55,0.55);
-        box-shadow: 0 10px 40px rgba(91,47,181,0.35), inset 0 0 0 4px rgba(10,7,20,0.35);
-    }
+    /* ---------- HERO AND HEADINGS ---------- */
+    .hero { text-align: center; padding: 26px 12px 6px 12px; margin-bottom: 4px; }
     .stApp .hero h1 {
-        margin: 0; font-family: 'Cinzel', Georgia, serif;
-        font-size: clamp(1.5rem, 4.2vw, 2.4rem); font-weight: 700;
-        color: #f3d98b; letter-spacing: 1.5px; line-height: 1.25;
+        margin: 0; font-size: clamp(2.2rem, 7vw, 4rem); font-weight: 700;
+        color: #f5f5f7; letter-spacing: -0.035em; line-height: 1.05;
     }
-    .stApp .hero p { margin: 12px 0 0 0; color: #ded6ff; font-size: 1rem; }
+    .stApp .hero .hero-sub { margin: 12px 0 0 0; font-size: clamp(1.15rem, 3.2vw, 1.9rem); font-weight: 500; color: #f5f5f7; }
+    .stApp .hero .hero-note { margin: 8px 0 0 0; font-size: clamp(1rem, 2.4vw, 1.3rem); color: #86868b; }
 
-    .page-header { margin-bottom: 22px; padding-bottom: 14px; border-bottom: 1px solid #2c1f4d; }
+    .page-header { text-align: center; margin: 6px 0 26px 0; }
     .stApp .page-header h2 {
-        margin: 0; color: #f3d98b; font-size: clamp(1.4rem, 3.5vw, 1.9rem);
-        font-weight: 700; letter-spacing: 1px;
+        margin: 0; color: #f5f5f7; font-size: clamp(1.8rem, 5vw, 2.6rem);
+        font-weight: 700; letter-spacing: -0.03em;
     }
-    .stApp .page-header p { margin: 6px 0 0 0; color: #9a8fc0; font-size: 0.95rem; }
+    .stApp .page-header p { margin: 8px 0 0 0; color: #86868b; font-size: 1.05rem; }
 
     .section-title {
-        font-family: 'Cinzel', Georgia, serif; font-size: 1.05rem; font-weight: 700;
-        letter-spacing: 0.6px; color: #f3d98b;
-        border-left: 4px solid #d4af37; padding-left: 12px; margin: 6px 0 14px 0;
+        font-size: 1.1rem; font-weight: 700; letter-spacing: -0.01em; color: #f5f5f7;
+        border-left: 3px solid #2e5bff; padding-left: 12px; margin: 6px 0 14px 0;
     }
 
     /* ---------- CARDS ---------- */
     [data-testid="stVerticalBlockBorderWrapper"] {
-        background: #140d26; border: 1px solid #2c1f4d !important;
-        border-radius: 14px; box-shadow: 0 4px 18px rgba(0,0,0,0.4);
+        background: #111113; border: 1px solid #2c2c30 !important;
+        border-radius: 18px; box-shadow: none;
     }
 
     /* ---------- INPUTS ---------- */
@@ -318,111 +288,114 @@ st.markdown("""
     .stApp div[data-baseweb="input"],
     .stApp div[data-baseweb="base-input"],
     .stApp div[data-baseweb="textarea"] {
-        background-color: #0f0a1f !important;
-        color: #f3ecff !important;
-        border-color: #34265c !important;
-        border-radius: 8px !important;
+        background-color: #1c1c1e !important;
+        color: #f5f5f7 !important;
+        border-color: #3a3a3f !important;
+        border-radius: 10px !important;
     }
     .stApp div[data-baseweb="input"]:focus-within,
     .stApp div[data-baseweb="textarea"]:focus-within,
     .stApp div[data-baseweb="select"] > div:focus-within {
-        border-color: #d4af37 !important;
-        box-shadow: 0 0 0 3px rgba(212,175,55,0.22) !important;
+        border-color: #2e5bff !important;
+        box-shadow: 0 0 0 3px rgba(46,91,255,0.30) !important;
     }
-    .stApp input::placeholder, .stApp textarea::placeholder { color: #75689b !important; opacity: 1; }
+    .stApp input::placeholder, .stApp textarea::placeholder { color: #6e6e73 !important; opacity: 1; }
     .stApp div[data-baseweb="select"] span,
-    .stApp div[data-baseweb="select"] svg { color: #f3ecff !important; fill: #f3ecff !important; }
+    .stApp div[data-baseweb="select"] svg { color: #f5f5f7 !important; fill: #f5f5f7 !important; }
     .stApp [data-testid="stNumberInput"] button {
-        background-color: #1c1338 !important; color: #f3ecff !important; border-color: #34265c !important;
+        background-color: #2c2c30 !important; color: #f5f5f7 !important; border-color: #3a3a3f !important;
     }
-    .stApp [data-testid="stNumberInput"] button svg { fill: #f3ecff !important; color: #f3ecff !important; }
+    .stApp [data-testid="stNumberInput"] button svg { fill: #f5f5f7 !important; color: #f5f5f7 !important; }
 
     /* Dropdown list that opens when a selectbox is clicked */
     div[data-baseweb="popover"] ul,
     div[data-baseweb="popover"] li,
     div[data-baseweb="popover"] div[role="option"] {
-        background-color: #140d26 !important; color: #f3ecff !important;
+        background-color: #1c1c1e !important; color: #f5f5f7 !important;
     }
-    div[data-baseweb="popover"] li:hover { background-color: #2a1c52 !important; }
+    div[data-baseweb="popover"] li:hover { background-color: #2c2c30 !important; }
 
     /* Checkbox and slider */
     .stApp [data-testid="stCheckbox"] span[role="checkbox"],
-    .stApp [data-baseweb="checkbox"] > span:first-child { border-color: #d4af37 !important; }
-    [data-testid="stSliderThumbValue"] { color: #f3d98b !important; font-weight: 600; }
-    [data-testid="stTickBarMin"], [data-testid="stTickBarMax"] { color: #9a8fc0 !important; }
-    div[data-baseweb="slider"] div[role="slider"] { background-color: #d4af37 !important; }
+    .stApp [data-baseweb="checkbox"] > span:first-child { border-color: #6f93ff !important; }
+    [data-testid="stSliderThumbValue"] { color: #7a9bff !important; font-weight: 600; }
+    [data-testid="stTickBarMin"], [data-testid="stTickBarMax"] { color: #86868b !important; }
+    div[data-baseweb="slider"] div[role="slider"] { background-color: #2e5bff !important; }
 
-    /* ---------- MAIN BUTTONS: gold with dark text ---------- */
+    /* ---------- MAIN BUTTONS: royal-blue pills ---------- */
     div.stButton > button {
-        background: linear-gradient(135deg, #f3d98b, #d4af37 55%, #b8901f); color: #1a1033;
-        border: none; border-radius: 10px; padding: 0.7rem 2rem; font-weight: 700; width: 100%;
-        box-shadow: 0 4px 16px rgba(212,175,55,0.35); transition: all 0.15s ease;
+        background-color: #2e5bff; color: #ffffff; border: none;
+        border-radius: 980px; padding: 0.75rem 2rem; font-weight: 600; width: 100%;
+        box-shadow: none; transition: background-color 0.15s ease;
     }
-    div.stButton > button:hover {
-        background: linear-gradient(135deg, #f8e4a3, #e0bb48 55%, #c79b26); color: #1a1033;
-        transform: translateY(-1px); box-shadow: 0 6px 22px rgba(212,175,55,0.5);
+    div.stButton > button:hover { background-color: #4a73ff; color: #ffffff; transform: none; box-shadow: none; }
+    div.stButton > button p { color: #ffffff !important; font-weight: 600; }
+
+    /* Hero buttons: one filled pill and one outlined pill (like Learn more / Pre-order) */
+    .st-key-hero_a div.stButton > button { padding: 0.8rem 1.4rem; font-size: 1.05rem; }
+    .st-key-hero_b div.stButton > button {
+        background-color: transparent; border: 1px solid #2e5bff; padding: 0.8rem 1.4rem;
     }
-    div.stButton > button p { color: #1a1033 !important; font-weight: 700; }
+    .st-key-hero_b div.stButton > button p { color: #7a9bff !important; font-size: 1.05rem; }
+    .st-key-hero_b div.stButton > button:hover { background-color: rgba(46,91,255,0.15); }
 
     /* ---------- METRIC CARDS ---------- */
     [data-testid="stMetric"] {
-        background: #140d26; padding: 16px; border-radius: 12px;
-        border: 1px solid #2c1f4d; border-top: 4px solid #d4af37;
-        box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+        background: #111113; padding: 18px; border-radius: 16px;
+        border: 1px solid #2c2c30; border-top: 3px solid #2e5bff;
     }
-    [data-testid="stMetricLabel"] * { color: #9a8fc0 !important; font-size: 0.8rem !important; letter-spacing: 0.4px; }
-    [data-testid="stMetricValue"] * { color: #f3d98b !important; font-weight: 700; }
+    [data-testid="stMetricLabel"] * { color: #86868b !important; font-size: 0.82rem !important; }
+    [data-testid="stMetricValue"] * { color: #f5f5f7 !important; font-weight: 700; letter-spacing: -0.02em; }
 
     /* ---------- ALERT BOXES ---------- */
     [data-testid="stAlert"] {
-        background-color: #1a1233 !important; border: 1px solid #34265c; border-radius: 10px;
+        background-color: #1c1c1e !important; border: 1px solid #3a3a3f; border-radius: 12px;
     }
-    [data-testid="stAlert"] * { color: #f3ecff !important; }
+    [data-testid="stAlert"] * { color: #f5f5f7 !important; }
 
     /* ---------- TABLES ---------- */
-    .stApp table { background: #140d26; border-collapse: collapse; width: 100%; }
-    .stApp th { background: #2a1c52 !important; color: #f3d98b !important; font-weight: 600; border-color: #34265c !important; }
-    .stApp td { color: #cfc6ee !important; background: #140d26 !important; border-color: #2c1f4d !important; }
-    .stApp tbody tr:nth-child(even) td { background: #0f0a1f !important; }
+    .stApp table { background: #111113; border-collapse: collapse; width: 100%; }
+    .stApp th { background: #1c1c1e !important; color: #f5f5f7 !important; font-weight: 600; border-color: #2c2c30 !important; }
+    .stApp td { color: #c7c7cc !important; background: #111113 !important; border-color: #2c2c30 !important; }
+    .stApp tbody tr:nth-child(even) td { background: #161618 !important; }
     /* Only the cost breakdown tables highlight their last row (TOTAL) */
     [class*="st-key-breakdown"] tbody tr:last-child td {
-        background: #3b1d82 !important; color: #f3d98b !important; font-weight: 700;
+        background: #15286b !important; color: #ffffff !important; font-weight: 700;
     }
 
     /* ---------- FORMS AND EXPANDERS ---------- */
-    [data-testid="stForm"] { background: #140d26; border: 1px solid #2c1f4d; border-radius: 14px; }
+    [data-testid="stForm"] { background: #111113; border: 1px solid #2c2c30; border-radius: 18px; }
     [data-testid="stFormSubmitButton"] > button {
-        background: linear-gradient(135deg, #f3d98b, #d4af37 55%, #b8901f); color: #1a1033; border: none;
-        border-radius: 10px; padding: 0.6rem 2rem; font-weight: 700; width: 100%;
-        box-shadow: 0 4px 16px rgba(212,175,55,0.35);
+        background-color: #2e5bff; color: #ffffff; border: none; border-radius: 980px;
+        padding: 0.7rem 2rem; font-weight: 600; width: 100%; box-shadow: none;
     }
-    [data-testid="stFormSubmitButton"] > button:hover { filter: brightness(1.08); color: #1a1033; }
-    [data-testid="stFormSubmitButton"] > button p { color: #1a1033 !important; }
+    [data-testid="stFormSubmitButton"] > button:hover { background-color: #4a73ff; color: #ffffff; }
+    [data-testid="stFormSubmitButton"] > button p { color: #ffffff !important; }
 
     [data-testid="stExpander"] {
-        background: #140d26; border: 1px solid #2c1f4d !important; border-radius: 12px; margin-bottom: 10px;
+        background: #111113; border: 1px solid #2c2c30 !important; border-radius: 14px; margin-bottom: 10px;
     }
     [data-testid="stExpander"] summary, [data-testid="stExpander"] summary * {
-        color: #f3ecff !important; font-weight: 600;
+        color: #f5f5f7 !important; font-weight: 600;
     }
 
     /* ---------- PROFILE AVATAR ---------- */
     .avatar {
         width: 88px; height: 88px; border-radius: 50%; margin: 4px auto 8px auto;
-        background: linear-gradient(135deg, #5b2fb5, #8b5cf6); color: #f3d98b;
-        border: 2px solid #d4af37;
+        background: linear-gradient(135deg, #3a3a3f, #2e5bff); color: #ffffff;
+        border: 2px solid #d2d2d7;
         display: flex; align-items: center; justify-content: center;
-        font-family: 'Cinzel', Georgia, serif; font-size: 1.9rem; font-weight: 700;
-        box-shadow: 0 6px 22px rgba(139,92,246,0.5);
+        font-size: 1.9rem; font-weight: 700; letter-spacing: -0.02em;
+        box-shadow: 0 6px 22px rgba(46,91,255,0.40);
     }
-    .profile-name { text-align: center; color: #f3ecff; font-family: 'Cinzel', Georgia, serif; font-weight: 700; font-size: 1.3rem; }
-    .profile-sub { text-align: center; color: #9a8fc0; font-size: 0.85rem; margin-bottom: 12px; }
+    .profile-name { text-align: center; color: #f5f5f7; font-weight: 700; font-size: 1.4rem; letter-spacing: -0.02em; }
+    .profile-sub { text-align: center; color: #86868b; font-size: 0.88rem; margin-bottom: 12px; }
 
     /* ---------- SMALL SCREENS ---------- */
     @media (max-width: 640px) {
-        .brand-text { display: none; }
-        .brand { padding-right: 8px; }
-        .st-key-topnav div.stButton > button { padding: 0.6rem 0.6rem; font-size: 0.85rem; }
+        .block-container { padding-top: 9rem !important; }
+        .promo { font-size: 0.8rem; padding: 10px 12px; }
+        .st-key-topnav div.stButton > button { padding: 0.9rem 0.5rem; }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -460,41 +433,46 @@ for e in st.session_state["expenses"]:
 ## 4. TOP MENU BAR
 ## ---------------------------------------------------------------
 
-## Fixed bar at the top: brand on the left, menu links in the middle, Profile button on the right
+## Fixed black bar at the top: crown logo, four menu links, a Profile icon, and a promo strip underneath
 def top_nav():
     current = st.session_state["page"]
     saved_count = len(st.session_state["history"])
 
-    ## First name of the client for the Profile button (or just "Profile" when no name is added yet)
-    name_parts = st.session_state["client_name"].strip().title().split()
-    profile_label = f"👤 {name_parts[0]}" if name_parts else "👤 Profile"
+    ## Small crown logo (drawn as SVG so it stays sharp on every screen)
+    crown_svg = (
+        '<svg width="22" height="22" viewBox="0 0 24 24">'
+        '<path d="M3 18h18v2H3zM3 7l4.5 4L12 4l4.5 7L21 7l-2 9H5z"/></svg>'
+    )
 
     with st.container(key="topnav"):
-        ## 1 brand + 4 menu links + 1 empty spacer + 1 profile button
-        cols = st.columns([2.2, 1.2, 1.2, 1.2, 1.2, 0.3, 1.2])
+        ## 1 logo + 4 menu links + 1 profile icon, all spread evenly across the bar
+        cols = st.columns([0.7, 1, 1, 1, 1, 0.7])
 
         with cols[0]:
-            st.markdown(
-                '<div class="brand"><div class="brand-crown">👑</div>'
-                '<div class="brand-text">Royal Events</div></div>',
-                unsafe_allow_html=True,
-            )
+            st.markdown(f'<div class="brand">{crown_svg}</div>', unsafe_allow_html=True)
 
-        for column, (page_name, icon) in zip(cols[1:5], nav_pages.items()):
+        for column, page_name in zip(cols[1:5], nav_pages):
             with column:
-                label = f"{icon} {page_name}"
+                label = page_name
                 if page_name == "Saved" and saved_count > 0:
-                    label = f"{icon} Saved ({saved_count})"
+                    label = f"Saved ({saved_count})"
                 st.button(
                     label, key=f"nav_{page_name}", on_click=go_to, args=(page_name,),
                     type="primary" if current == page_name else "secondary",
                 )
 
-        with cols[6]:
+        with cols[5]:
             st.button(
-                profile_label, key="nav_Profile", on_click=go_to, args=("Profile",),
+                "👤", key="nav_Profile", help="Profile", on_click=go_to, args=("Profile",),
                 type="primary" if current == "Profile" else "secondary",
             )
+
+        ## Promo strip (like the offer line under the Apple menu)
+        st.markdown(
+            '<div class="promo">Instant estimates with 18% GST included. '
+            'Save up to <b>30%</b> on bulk, returning and corporate bookings.</div>',
+            unsafe_allow_html=True,
+        )
 
 
 ## ---------------------------------------------------------------
@@ -567,7 +545,7 @@ def show_estimate():
     chart_names = ["Venue", "Catering", "Decor", "Add-ons"]
     chart_costs = [estimate["venue_cost"], estimate["catering_cost"],
                    estimate["decor_cost"], estimate["addon_cost"]]
-    chart_colors = ["#d4af37", "#8b5cf6", "#e879a8", "#2dd4bf"]
+    chart_colors = ["#2e5bff", "#7a9bff", "#a1a1a6", "#5e5ce6"]
     chart_values = {}
     for position, name in enumerate(chart_names):
         column_values = [0, 0, 0, 0]
@@ -597,16 +575,23 @@ def show_estimate():
     st.caption("Next step: open the Expenses page to track every payment against this estimate.")
 
 
-## Calculator page: banner, event inputs, Calculate button and estimate display
+## Calculator page: hero, event inputs, Calculate button and estimate display
 def calculator_page():
 
-    ## Big banner (only on this page)
+    ## Big centred hero (only on this page), then two pill buttons like Learn more / Pre-order
     st.markdown("""
     <div class="hero">
-        <h1>👑 Royal Event Budget Calculator</h1>
-        <p>Plan a celebration fit for royalty, with an instant and honest budget estimate</p>
+        <h1>Event Budget Calculator</h1>
+        <p class="hero-sub">Plan your event in minutes</p>
+        <p class="hero-note">Weddings, parties, corporate events and conferences</p>
     </div>
     """, unsafe_allow_html=True)
+
+    hb0, hb1, hb2, hb3 = st.columns([1.6, 1.3, 1.3, 1.6])
+    with hb1:
+        st.button("View price list", key="hero_a", on_click=go_to, args=("Price List",))
+    with hb2:
+        st.button("Track expenses", key="hero_b", on_click=go_to, args=("Expenses",))
 
     ## Reminder to fill the Profile page when no client name is saved yet
     if st.session_state["client_name"].strip() == "":
@@ -903,7 +888,7 @@ def calculator_page():
 
 ## Price list page: venues, catering, decoration and add-ons, plus the discount rules
 def price_list_page():
-    page_header("Royal Price List", "All prices are before discount and 18% GST.")
+    page_header("Price List", "All prices are before discount and 18% GST.")
 
     ## Venue prices
     with st.container(border=True):
@@ -956,7 +941,7 @@ def expenses_page():
     ## The tracker needs a calculated budget, so ask the user to calculate one first
     if "budget" not in st.session_state:
         st.info("No budget yet. Calculate a budget on the Calculator page first, then come back here.")
-        st.button("🧮 Go to Calculator", key="go_calc", on_click=go_to, args=("Calculator",))
+        st.button("Go to Calculator", key="go_calc", on_click=go_to, args=("Calculator",))
         return
 
     budget_categories = st.session_state["budget"]["categories"]
@@ -1141,7 +1126,7 @@ def saved_page():
     history = st.session_state["history"]
     if len(history) == 0:
         st.info("No saved estimates yet. Calculate a budget on the Calculator page and press Save Estimate.")
-        st.button("🧮 Go to Calculator", key="go_calc_saved", on_click=go_to, args=("Calculator",))
+        st.button("Go to Calculator", key="go_calc_saved", on_click=go_to, args=("Calculator",))
         return
 
     st.caption(f"{len(history)} saved estimate(s).")
@@ -1228,7 +1213,7 @@ def profile_page():
 ## 10. DRAW THE TOP BAR AND SHOW THE SELECTED PAGE
 ## ---------------------------------------------------------------
 
-## Top menu bar: always visible, the open page is underlined in gold
+## Top menu bar: always visible, the open page is underlined in royal blue
 top_nav()
 
 ## Show the page that is selected
