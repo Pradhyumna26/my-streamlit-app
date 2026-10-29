@@ -1,7 +1,8 @@
-## Event Budget Calculator (business idea: Event Management)
+## Royal Event Budget Calculator (business idea: Event Management)
 ## Run with: streamlit run app.py
 ## Needs Python 3.10 or newer (match-case is used) and a recent Streamlit: pip install --upgrade streamlit
-## The app has 3 pages (Home, Menu, Profile) and an icon bar at the bottom to move between them
+## The app has a TOP menu bar (like the Streamlit Playground site) with 5 pages:
+##   Calculator, Price List, Expenses, Saved and Profile
 
 
 ## Import the libraries: html (safe text for the avatar), datetime (save time), pandas (chart data), streamlit (the app)
@@ -57,8 +58,13 @@ event_times = ["Morning", "Afternoon", "Evening"]
 mobile_start_digits = ["6", "7", "8", "9"]
 planning_keywords = ["music", "band", "flower", "stage", "fireworks", "photo"]
 
-## The 3 pages and the icon shown for each one in the bottom bar
-pages = {"Home": "🏠", "Menu": "🍽️", "Profile": "👤"}
+## The menu links shown in the top bar (the Profile button sits on the right side of the bar)
+nav_pages = {
+    "Calculator": "🧮",
+    "Price List": "📜",
+    "Expenses": "💰",
+    "Saved": "💾",
+}
 
 
 ## ---------------------------------------------------------------
@@ -83,12 +89,20 @@ def format_money(amount):
     return f"{sign}₹{whole}.{decimals}"
 
 
-## Show a small uppercase section heading with a violet bar on the left
+## Show a section heading with a gold bar on the left
 def section_title(text):
     st.markdown(f'<div class="section-title">{text}</div>', unsafe_allow_html=True)
 
 
-## Remember which page should be shown (runs when a bottom bar button is clicked)
+## Show the title of a page (used on every page except the Calculator, which has the big banner)
+def page_header(title, subtitle):
+    st.markdown(
+        f'<div class="page-header"><h2>{title}</h2><p>{subtitle}</p></div>',
+        unsafe_allow_html=True,
+    )
+
+
+## Remember which page should be shown (runs when a top bar button is clicked)
 def go_to(page_name):
     st.session_state["page"] = page_name
 
@@ -164,197 +178,258 @@ def delete_expense(expense_id):
 
 
 ## ---------------------------------------------------------------
-## 3. PAGE SETUP AND DARK THEME DESIGN
+## 3. PAGE SETUP AND ROYAL THEME DESIGN
 ## ---------------------------------------------------------------
+## Colours used: midnight violet #0a0714 (page), deep amethyst #140d26 (cards),
+## royal purple #5b2fb5 (accent), antique gold #d4af37 (highlights), ivory #f3ecff (text)
 
 ## Page title and icon shown in the browser tab
-st.set_page_config(page_title="Event Budget Calculator", page_icon="🎉")
+st.set_page_config(page_title="Royal Event Budget Calculator", page_icon="👑", layout="wide")
 
-## Dark premium theme (CSS): colours, fonts, cards, inputs, buttons, tables, avatar and the fixed bottom bar
+## Royal theme (CSS): colours, fonts, cards, inputs, buttons, tables, avatar and the fixed top menu bar
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cinzel:wght@500;600;700;800&display=swap');
 
     html, body, .stApp, .stApp * { font-family: 'Inter', 'Segoe UI', sans-serif; }
 
-    /* Hide default Streamlit menu and footer */
+    /* Hide the default Streamlit header, menu and footer (our own top bar replaces them) */
     #MainMenu, footer { visibility: hidden; }
-    header[data-testid="stHeader"] { background: transparent; }
+    header[data-testid="stHeader"], [data-testid="stToolbar"], [data-testid="stDecoration"] { display: none !important; }
 
-    /* Page background and space at the bottom so the icon bar never hides content */
-    .stApp { background-color: #0b0f1a; }
-    .block-container { max-width: 820px; padding-top: 2rem; padding-bottom: 10rem !important; }
-    .bottom-space { height: 140px; }
+    /* Page background and space at the top so the fixed menu bar never hides content */
+    .stApp {
+        background-color: #0a0714;
+        background-image:
+            radial-gradient(ellipse at 15% -10%, rgba(91,47,181,0.28) 0%, transparent 50%),
+            radial-gradient(ellipse at 90% 0%, rgba(212,175,55,0.08) 0%, transparent 40%);
+    }
+    .block-container { max-width: 1000px; padding-top: 6.5rem !important; padding-bottom: 4rem !important; }
+
+    /* Headings use a classic royal serif, body text stays clean */
+    .stApp h1, .stApp h2, .stApp h3, .stApp h4 { color: #f3ecff; font-family: 'Cinzel', Georgia, serif; }
 
     /* All normal text (light on dark) */
-    .stApp h1, .stApp h2, .stApp h3, .stApp h4 { color: #e6e9f2; }
     .stApp p, .stApp label, .stApp span, .stApp li,
-    .stApp [data-testid="stMarkdownContainer"] p { color: #c3cadb; }
-    .stApp [data-testid="stWidgetLabel"] p { font-weight: 500; color: #e6e9f2; }
-    .stApp [data-testid="stCaptionContainer"] p { color: #7d88a0; font-size: 0.8rem; }
-    .stApp [data-testid="stTooltipIcon"] svg { color: #98a2b8; }
+    .stApp [data-testid="stMarkdownContainer"] p { color: #cfc6ee; }
+    .stApp [data-testid="stWidgetLabel"] p { font-weight: 500; color: #f3ecff; }
+    .stApp [data-testid="stCaptionContainer"] p { color: #9a8fc0; font-size: 0.8rem; }
+    .stApp [data-testid="stTooltipIcon"] svg { color: #b3a8d6; }
+    .stApp hr { border-color: #2c1f4d; }
 
-    /* Hero banner */
+    /* ---------- TOP MENU BAR (fixed, like the Streamlit Playground site) ---------- */
+    .st-key-topnav {
+        position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+        background: rgba(10,7,20,0.94); backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(212,175,55,0.35);
+        padding: 8px max(14px, calc((100vw - 1000px) / 2));
+        box-shadow: 0 6px 28px rgba(0,0,0,0.5);
+    }
+    .st-key-topnav [data-testid="stHorizontalBlock"] {
+        flex-direction: row !important; flex-wrap: nowrap !important; align-items: center;
+        gap: 4px; overflow-x: auto; scrollbar-width: none;
+    }
+    .st-key-topnav [data-testid="stHorizontalBlock"]::-webkit-scrollbar { display: none; }
+    .st-key-topnav [data-testid="stColumn"] {
+        flex: 0 0 auto !important; width: auto !important; min-width: 0 !important;
+    }
+    /* The empty 6th column pushes the Profile button to the far right */
+    .st-key-topnav [data-testid="stColumn"]:nth-child(6) { flex: 1 1 auto !important; }
+
+    /* Brand: crown + name on the left */
+    .brand { display: flex; align-items: center; gap: 10px; padding-right: 22px; white-space: nowrap; }
+    .brand-crown {
+        width: 36px; height: 36px; border-radius: 10px; font-size: 1.15rem;
+        display: flex; align-items: center; justify-content: center;
+        background: linear-gradient(135deg, #5b2fb5, #8b5cf6);
+        border: 1px solid rgba(212,175,55,0.6);
+        box-shadow: 0 0 14px rgba(139,92,246,0.5);
+    }
+    .brand-text {
+        font-family: 'Cinzel', Georgia, serif; font-weight: 700; font-size: 1.15rem;
+        letter-spacing: 1px; color: #f3d98b;
+    }
+
+    /* Menu links: plain text, the open page gets a gold underline */
+    .st-key-topnav div.stButton > button {
+        background: transparent; box-shadow: none; transform: none;
+        border: none; border-bottom: 2px solid transparent; border-radius: 0;
+        padding: 0.65rem 0.95rem; width: auto; white-space: nowrap;
+        color: #cfc6ee; font-size: 0.92rem;
+    }
+    .st-key-topnav div.stButton > button p { color: inherit !important; font-weight: 500; white-space: nowrap; }
+    .st-key-topnav div.stButton > button:hover {
+        background: rgba(212,175,55,0.08); color: #f3d98b; transform: none; box-shadow: none;
+    }
+    .st-key-topnav div.stButton > button[data-testid="stBaseButton-primary"],
+    .st-key-topnav div.stButton > button[kind="primary"] {
+        background: rgba(212,175,55,0.10); color: #f3d98b; border-bottom: 2px solid #d4af37;
+    }
+    .st-key-topnav div.stButton > button[data-testid="stBaseButton-primary"] p,
+    .st-key-topnav div.stButton > button[kind="primary"] p { font-weight: 700; }
+
+    /* Profile button on the right: gold outline, like the Free / Pro buttons in the sample */
+    .st-key-nav_Profile div.stButton > button {
+        border: 1px solid rgba(212,175,55,0.7) !important; border-radius: 10px !important;
+        color: #f3d98b; padding: 0.5rem 1.1rem;
+    }
+    .st-key-nav_Profile div.stButton > button[data-testid="stBaseButton-primary"],
+    .st-key-nav_Profile div.stButton > button[kind="primary"] {
+        background: linear-gradient(135deg, #f3d98b, #d4af37 55%, #b8901f) !important;
+        color: #1a1033 !important; border: 1px solid #f3d98b !important;
+    }
+
+    /* ---------- BANNER AND HEADINGS ---------- */
     .hero {
-        background: linear-gradient(135deg, #0f1530 0%, #2a1f6b 55%, #5b4bff 100%);
-        padding: 38px 24px; border-radius: 18px; text-align: center;
-        margin-bottom: 26px; border: 1px solid #2a3350;
-        box-shadow: 0 10px 40px rgba(91,75,255,0.25);
+        background: linear-gradient(135deg, #140a33 0%, #3b1d82 55%, #6d3fd1 100%);
+        padding: 40px 24px; border-radius: 18px; text-align: center;
+        margin-bottom: 26px; border: 1px solid rgba(212,175,55,0.55);
+        box-shadow: 0 10px 40px rgba(91,47,181,0.35), inset 0 0 0 4px rgba(10,7,20,0.35);
     }
     .stApp .hero h1 {
-        margin: 0; font-family: 'Playfair Display', Georgia, serif;
-        font-size: clamp(1.6rem, 4.5vw, 2.5rem); font-weight: 700;
-        color: #ffffff; letter-spacing: 0.5px; line-height: 1.25;
+        margin: 0; font-family: 'Cinzel', Georgia, serif;
+        font-size: clamp(1.5rem, 4.2vw, 2.4rem); font-weight: 700;
+        color: #f3d98b; letter-spacing: 1.5px; line-height: 1.25;
     }
-    .stApp .hero p { margin: 10px 0 0 0; color: #c7c9ff; font-size: 1rem; }
+    .stApp .hero p { margin: 12px 0 0 0; color: #ded6ff; font-size: 1rem; }
 
-    /* Section headings */
+    .page-header { margin-bottom: 22px; padding-bottom: 14px; border-bottom: 1px solid #2c1f4d; }
+    .stApp .page-header h2 {
+        margin: 0; color: #f3d98b; font-size: clamp(1.4rem, 3.5vw, 1.9rem);
+        font-weight: 700; letter-spacing: 1px;
+    }
+    .stApp .page-header p { margin: 6px 0 0 0; color: #9a8fc0; font-size: 0.95rem; }
+
     .section-title {
-        font-size: 0.78rem; font-weight: 700; letter-spacing: 1.2px;
-        text-transform: uppercase; color: #a5a0ff;
-        border-left: 4px solid #7c6cff; padding-left: 10px; margin: 6px 0 14px 0;
+        font-family: 'Cinzel', Georgia, serif; font-size: 1.05rem; font-weight: 700;
+        letter-spacing: 0.6px; color: #f3d98b;
+        border-left: 4px solid #d4af37; padding-left: 12px; margin: 6px 0 14px 0;
     }
 
-    /* Cards (st.container with border) */
+    /* ---------- CARDS ---------- */
     [data-testid="stVerticalBlockBorderWrapper"] {
-        background: #121826; border: 1px solid #232b3d !important;
-        border-radius: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+        background: #140d26; border: 1px solid #2c1f4d !important;
+        border-radius: 14px; box-shadow: 0 4px 18px rgba(0,0,0,0.4);
     }
 
-    /* Input boxes: dark fill, light text, violet focus glow */
+    /* ---------- INPUTS ---------- */
     .stApp input, .stApp textarea,
     .stApp div[data-baseweb="select"] > div,
     .stApp div[data-baseweb="input"],
     .stApp div[data-baseweb="base-input"],
     .stApp div[data-baseweb="textarea"] {
-        background-color: #0e1422 !important;
-        color: #e6e9f2 !important;
-        border-color: #2a3350 !important;
+        background-color: #0f0a1f !important;
+        color: #f3ecff !important;
+        border-color: #34265c !important;
         border-radius: 8px !important;
     }
     .stApp div[data-baseweb="input"]:focus-within,
     .stApp div[data-baseweb="textarea"]:focus-within,
     .stApp div[data-baseweb="select"] > div:focus-within {
-        border-color: #7c6cff !important;
-        box-shadow: 0 0 0 3px rgba(124,108,255,0.25) !important;
+        border-color: #d4af37 !important;
+        box-shadow: 0 0 0 3px rgba(212,175,55,0.22) !important;
     }
-    .stApp input::placeholder, .stApp textarea::placeholder {
-        color: #66718a !important; opacity: 1;
-    }
+    .stApp input::placeholder, .stApp textarea::placeholder { color: #75689b !important; opacity: 1; }
     .stApp div[data-baseweb="select"] span,
-    .stApp div[data-baseweb="select"] svg { color: #e6e9f2 !important; fill: #e6e9f2 !important; }
+    .stApp div[data-baseweb="select"] svg { color: #f3ecff !important; fill: #f3ecff !important; }
     .stApp [data-testid="stNumberInput"] button {
-        background-color: #1a2236 !important; color: #e6e9f2 !important; border-color: #2a3350 !important;
+        background-color: #1c1338 !important; color: #f3ecff !important; border-color: #34265c !important;
     }
-    .stApp [data-testid="stNumberInput"] button svg { fill: #e6e9f2 !important; color: #e6e9f2 !important; }
+    .stApp [data-testid="stNumberInput"] button svg { fill: #f3ecff !important; color: #f3ecff !important; }
 
     /* Dropdown list that opens when a selectbox is clicked */
     div[data-baseweb="popover"] ul,
     div[data-baseweb="popover"] li,
     div[data-baseweb="popover"] div[role="option"] {
-        background-color: #121826 !important; color: #e6e9f2 !important;
+        background-color: #140d26 !important; color: #f3ecff !important;
     }
-    div[data-baseweb="popover"] li:hover { background-color: #1f2747 !important; }
+    div[data-baseweb="popover"] li:hover { background-color: #2a1c52 !important; }
 
-    /* Slider */
-    [data-testid="stSliderThumbValue"] { color: #a5a0ff !important; font-weight: 600; }
-    [data-testid="stTickBarMin"], [data-testid="stTickBarMax"] { color: #7d88a0 !important; }
-    div[data-baseweb="slider"] div[role="slider"] { background-color: #7c6cff !important; }
+    /* Checkbox and slider */
+    .stApp [data-testid="stCheckbox"] span[role="checkbox"],
+    .stApp [data-baseweb="checkbox"] > span:first-child { border-color: #d4af37 !important; }
+    [data-testid="stSliderThumbValue"] { color: #f3d98b !important; font-weight: 600; }
+    [data-testid="stTickBarMin"], [data-testid="stTickBarMax"] { color: #9a8fc0 !important; }
+    div[data-baseweb="slider"] div[role="slider"] { background-color: #d4af37 !important; }
 
-    /* Main button: violet with glow */
+    /* ---------- MAIN BUTTONS: gold with dark text ---------- */
     div.stButton > button {
-        background-color: #7c6cff; color: #ffffff; border: none;
-        border-radius: 10px; padding: 0.7rem 2rem; font-weight: 600; width: 100%;
-        box-shadow: 0 4px 16px rgba(124,108,255,0.45); transition: all 0.15s ease;
+        background: linear-gradient(135deg, #f3d98b, #d4af37 55%, #b8901f); color: #1a1033;
+        border: none; border-radius: 10px; padding: 0.7rem 2rem; font-weight: 700; width: 100%;
+        box-shadow: 0 4px 16px rgba(212,175,55,0.35); transition: all 0.15s ease;
     }
     div.stButton > button:hover {
-        background-color: #6a59f5; color: #ffffff; transform: translateY(-1px);
-        box-shadow: 0 6px 22px rgba(124,108,255,0.6);
+        background: linear-gradient(135deg, #f8e4a3, #e0bb48 55%, #c79b26); color: #1a1033;
+        transform: translateY(-1px); box-shadow: 0 6px 22px rgba(212,175,55,0.5);
     }
-    div.stButton > button p { color: #ffffff !important; font-weight: 600; }
+    div.stButton > button p { color: #1a1033 !important; font-weight: 700; }
 
-    /* Metric cards */
+    /* ---------- METRIC CARDS ---------- */
     [data-testid="stMetric"] {
-        background: #121826; padding: 16px; border-radius: 12px;
-        border: 1px solid #232b3d; border-top: 4px solid #7c6cff;
-        box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+        background: #140d26; padding: 16px; border-radius: 12px;
+        border: 1px solid #2c1f4d; border-top: 4px solid #d4af37;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.4);
     }
-    [data-testid="stMetricLabel"] * {
-        color: #7d88a0 !important; font-size: 0.75rem !important;
-        text-transform: uppercase; letter-spacing: 0.6px;
-    }
-    [data-testid="stMetricValue"] * { color: #ffffff !important; font-weight: 700; }
+    [data-testid="stMetricLabel"] * { color: #9a8fc0 !important; font-size: 0.8rem !important; letter-spacing: 0.4px; }
+    [data-testid="stMetricValue"] * { color: #f3d98b !important; font-weight: 700; }
 
-    /* Alert boxes (success / info / error) kept dark and readable */
+    /* ---------- ALERT BOXES ---------- */
     [data-testid="stAlert"] {
-        background-color: #151c30 !important; border: 1px solid #2a3350; border-radius: 10px;
+        background-color: #1a1233 !important; border: 1px solid #34265c; border-radius: 10px;
     }
-    [data-testid="stAlert"] * { color: #e6e9f2 !important; }
+    [data-testid="stAlert"] * { color: #f3ecff !important; }
 
-    /* Tables (the last row is highlighted, e.g. TOTAL) */
-    .stApp table { background: #121826; border-collapse: collapse; width: 100%; }
-    .stApp th { background: #1d2550 !important; color: #ffffff !important; font-weight: 600; border-color: #2a3350 !important; }
-    .stApp td { color: #c3cadb !important; background: #121826 !important; border-color: #232b3d !important; }
-    .stApp tbody tr:nth-child(even) td { background: #0e1422 !important; }
-    .stApp tbody tr:last-child td { background: #2a1f6b !important; color: #ffffff !important; font-weight: 700; }
-
-    /* Expense form */
-    [data-testid="stForm"] {
-        background: #121826; border: 1px solid #232b3d; border-radius: 14px;
+    /* ---------- TABLES ---------- */
+    .stApp table { background: #140d26; border-collapse: collapse; width: 100%; }
+    .stApp th { background: #2a1c52 !important; color: #f3d98b !important; font-weight: 600; border-color: #34265c !important; }
+    .stApp td { color: #cfc6ee !important; background: #140d26 !important; border-color: #2c1f4d !important; }
+    .stApp tbody tr:nth-child(even) td { background: #0f0a1f !important; }
+    /* Only the cost breakdown tables highlight their last row (TOTAL) */
+    [class*="st-key-breakdown"] tbody tr:last-child td {
+        background: #3b1d82 !important; color: #f3d98b !important; font-weight: 700;
     }
+
+    /* ---------- FORMS AND EXPANDERS ---------- */
+    [data-testid="stForm"] { background: #140d26; border: 1px solid #2c1f4d; border-radius: 14px; }
     [data-testid="stFormSubmitButton"] > button {
-        background-color: #7c6cff; color: #ffffff; border: none; border-radius: 10px;
-        padding: 0.6rem 2rem; font-weight: 600; width: 100%;
-        box-shadow: 0 4px 16px rgba(124,108,255,0.45);
+        background: linear-gradient(135deg, #f3d98b, #d4af37 55%, #b8901f); color: #1a1033; border: none;
+        border-radius: 10px; padding: 0.6rem 2rem; font-weight: 700; width: 100%;
+        box-shadow: 0 4px 16px rgba(212,175,55,0.35);
     }
-    [data-testid="stFormSubmitButton"] > button:hover { background-color: #6a59f5; color: #ffffff; }
-    [data-testid="stFormSubmitButton"] > button p { color: #ffffff !important; }
+    [data-testid="stFormSubmitButton"] > button:hover { filter: brightness(1.08); color: #1a1033; }
+    [data-testid="stFormSubmitButton"] > button p { color: #1a1033 !important; }
 
-    /* Saved estimates (expanders on the Profile page) */
     [data-testid="stExpander"] {
-        background: #121826; border: 1px solid #232b3d !important; border-radius: 12px;
-        margin-bottom: 10px;
+        background: #140d26; border: 1px solid #2c1f4d !important; border-radius: 12px; margin-bottom: 10px;
     }
     [data-testid="stExpander"] summary, [data-testid="stExpander"] summary * {
-        color: #e6e9f2 !important; font-weight: 600;
+        color: #f3ecff !important; font-weight: 600;
     }
 
-    /* Profile avatar (circle with initials) */
+    /* ---------- PROFILE AVATAR ---------- */
     .avatar {
-        width: 84px; height: 84px; border-radius: 50%; margin: 4px auto 8px auto;
-        background: linear-gradient(135deg, #5b4bff, #a5a0ff); color: #ffffff;
+        width: 88px; height: 88px; border-radius: 50%; margin: 4px auto 8px auto;
+        background: linear-gradient(135deg, #5b2fb5, #8b5cf6); color: #f3d98b;
+        border: 2px solid #d4af37;
         display: flex; align-items: center; justify-content: center;
-        font-size: 1.9rem; font-weight: 700; box-shadow: 0 6px 20px rgba(91,75,255,0.45);
+        font-family: 'Cinzel', Georgia, serif; font-size: 1.9rem; font-weight: 700;
+        box-shadow: 0 6px 22px rgba(139,92,246,0.5);
     }
-    .profile-name { text-align: center; color: #e6e9f2; font-weight: 600; font-size: 1.2rem; }
-    .profile-sub { text-align: center; color: #7d88a0; font-size: 0.85rem; margin-bottom: 10px; }
+    .profile-name { text-align: center; color: #f3ecff; font-family: 'Cinzel', Georgia, serif; font-weight: 700; font-size: 1.3rem; }
+    .profile-sub { text-align: center; color: #9a8fc0; font-size: 0.85rem; margin-bottom: 12px; }
 
-    /* Bottom navigation bar: fixed to the bottom, 3 icon buttons in one row */
-    .st-key-bottomnav {
-        position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-        width: min(820px, 100%); z-index: 999; background: #0e1422;
-        border-top: 1px solid #2a3350; padding: 8px 12px 10px 12px;
-        box-shadow: 0 -6px 24px rgba(0,0,0,0.45);
+    /* ---------- SMALL SCREENS ---------- */
+    @media (max-width: 640px) {
+        .brand-text { display: none; }
+        .brand { padding-right: 8px; }
+        .st-key-topnav div.stButton > button { padding: 0.6rem 0.6rem; font-size: 0.85rem; }
     }
-    .st-key-bottomnav [data-testid="stHorizontalBlock"] {
-        flex-direction: row !important; flex-wrap: nowrap !important; gap: 8px;
-    }
-    .st-key-bottomnav [data-testid="stColumn"] {
-        min-width: 0 !important; flex: 1 1 0 !important; width: auto !important;
-    }
-    .st-key-bottomnav div.stButton > button { padding: 0.55rem 0.4rem; border-radius: 12px; }
-    .st-key-bottomnav div.stButton > button[data-testid="stBaseButton-secondary"],
-    .st-key-bottomnav div.stButton > button[kind="secondary"] {
-        background-color: transparent; box-shadow: none; border: 1px solid #232b3d;
-    }
-    .st-key-bottomnav div.stButton > button[data-testid="stBaseButton-secondary"] p,
-    .st-key-bottomnav div.stButton > button[kind="secondary"] p { color: #98a2b8 !important; }
 </style>
 """, unsafe_allow_html=True)
 
 ## Keep typed values when you move to another page (Streamlit forgets a widget value when its page is not shown)
 defaults = {
-    "page": "Home",
+    "page": "Calculator",
     "history": [],
     "asking_name": False,
     "save_name": "",
@@ -380,23 +455,56 @@ for e in st.session_state["expenses"]:
         e["id"] = st.session_state["next_expense_id"]
         st.session_state["next_expense_id"] += 1
 
-## Banner header shown on every page
-st.markdown("""
-<div class="hero">
-    <h1> Event Budget Calculator</h1>
-    <p>Bring your dream event to life with an instant budget estimate</p>
-</div>
-""", unsafe_allow_html=True)
+
+## ---------------------------------------------------------------
+## 4. TOP MENU BAR
+## ---------------------------------------------------------------
+
+## Fixed bar at the top: brand on the left, menu links in the middle, Profile button on the right
+def top_nav():
+    current = st.session_state["page"]
+    saved_count = len(st.session_state["history"])
+
+    ## First name of the client for the Profile button (or just "Profile" when no name is added yet)
+    name_parts = st.session_state["client_name"].strip().title().split()
+    profile_label = f"👤 {name_parts[0]}" if name_parts else "👤 Profile"
+
+    with st.container(key="topnav"):
+        ## 1 brand + 4 menu links + 1 empty spacer + 1 profile button
+        cols = st.columns([2.2, 1.2, 1.2, 1.2, 1.2, 0.3, 1.2])
+
+        with cols[0]:
+            st.markdown(
+                '<div class="brand"><div class="brand-crown">👑</div>'
+                '<div class="brand-text">Royal Events</div></div>',
+                unsafe_allow_html=True,
+            )
+
+        for column, (page_name, icon) in zip(cols[1:5], nav_pages.items()):
+            with column:
+                label = f"{icon} {page_name}"
+                if page_name == "Saved" and saved_count > 0:
+                    label = f"{icon} Saved ({saved_count})"
+                st.button(
+                    label, key=f"nav_{page_name}", on_click=go_to, args=(page_name,),
+                    type="primary" if current == page_name else "secondary",
+                )
+
+        with cols[6]:
+            st.button(
+                profile_label, key="nav_Profile", on_click=go_to, args=("Profile",),
+                type="primary" if current == "Profile" else "secondary",
+            )
 
 
 ## ---------------------------------------------------------------
-## 4. HOME PAGE: SAVE AREA, ESTIMATE DISPLAY AND MAIN FUNCTION
+## 5. CALCULATOR PAGE: SAVE AREA, ESTIMATE DISPLAY AND MAIN FUNCTION
 ## ---------------------------------------------------------------
 
 ## Save area under the estimate: Save button -> asks for a name -> saved message
 def save_area(estimate):
     if estimate["saved_as"] != "":
-        st.success(f"✅ Saved as '{estimate['saved_as']}'. Open the Profile page to see it in Saved Estimates.")
+        st.success(f"✅ Saved as '{estimate['saved_as']}'. Open the Saved page to see it.")
     elif not st.session_state["asking_name"]:
         st.button("💾 Save Estimate", key="start_save", on_click=start_saving)
     else:
@@ -415,7 +523,7 @@ def save_area(estimate):
                 st.button("Cancel", key="cancel_save", on_click=cancel_saving)
 
 
-## Draw the last calculated estimate from session_state (it stays on screen while you save, add expenses or change page)
+## Draw the last calculated estimate from session_state (it stays on screen while you save or change page)
 def show_estimate():
     estimate = st.session_state["estimate"]
     st.caption("Showing your last calculated estimate. Press Calculate Budget again after changing any input.")
@@ -452,13 +560,14 @@ def show_estimate():
                    format_money(estimate["subtotal"]), "-" + format_money(estimate["discount_amount"]),
                    format_money(estimate["gst"]), format_money(estimate["total"])],
     }
-    st.table(breakdown)
+    with st.container(key="breakdown_main"):
+        st.table(breakdown)
 
     section_title("Where Your Money Goes")
     chart_names = ["Venue", "Catering", "Decor", "Add-ons"]
     chart_costs = [estimate["venue_cost"], estimate["catering_cost"],
                    estimate["decor_cost"], estimate["addon_cost"]]
-    chart_colors = ["#7c6cff", "#2dd4bf", "#fb923c", "#facc15"]
+    chart_colors = ["#d4af37", "#8b5cf6", "#e879a8", "#2dd4bf"]
     chart_values = {}
     for position, name in enumerate(chart_names):
         column_values = [0, 0, 0, 0]
@@ -467,7 +576,7 @@ def show_estimate():
 
     chart_data = pd.DataFrame(chart_values, index=chart_names)
     st.bar_chart(chart_data, color=chart_colors)
-    
+
     ## Show the special request back to the user with spotted keywords and a music tip
     if estimate["request_text"] != "":
         st.info(f"📝 Special request noted ({estimate['word_count']} words): {estimate['request_text']}")
@@ -484,13 +593,24 @@ def show_estimate():
     if estimate["total_discount_percent"] == MAX_DISCOUNT_PERCENT:
         st.caption(f"Total discount is capped at {MAX_DISCOUNT_PERCENT}%.")
 
+    ## Next step: go and track the real payments
+    st.caption("Next step: open the Expenses page to track every payment against this estimate.")
 
-## Home page: event inputs, Calculate button, estimate display and expense tracker
-def home_page():
+
+## Calculator page: banner, event inputs, Calculate button and estimate display
+def calculator_page():
+
+    ## Big banner (only on this page)
+    st.markdown("""
+    <div class="hero">
+        <h1>👑 Royal Event Budget Calculator</h1>
+        <p>Plan a celebration fit for royalty, with an instant and honest budget estimate</p>
+    </div>
+    """, unsafe_allow_html=True)
 
     ## Reminder to fill the Profile page when no client name is saved yet
     if st.session_state["client_name"].strip() == "":
-        st.info("👤 Tip: add your name and contact details on the Profile page.")
+        st.info("👤 Tip: add your name and contact details on the Profile page (top right).")
 
     ## Card 1: event type, event time, number of guests and number of days
     with st.container(border=True):
@@ -710,7 +830,7 @@ def home_page():
 
                 music_tip = ("band" in request_lower or "music" in request_lower) and not (want_dj or want_stage)
 
-                ## Keep the category amounts for the expense tracker
+                ## Keep the category amounts for the expense tracker (Expenses page)
                 st.session_state["budget"] = {
                     "categories": {
                         "Venue": venue_cost,
@@ -772,194 +892,18 @@ def home_page():
             ## Safety net so the app never crashes on unexpected input
             st.error(f"Something went wrong: {error}")
 
-    ## Show the estimate (it stays visible while you save, add expenses or change page)
+    ## Show the estimate (it stays visible while you save or change page)
     if "estimate" in st.session_state:
         show_estimate()
 
-    ## Expense tracker: shown only after a budget has been calculated
-    if "budget" in st.session_state:
-        budget_categories = st.session_state["budget"]["categories"]
-        budget_total = st.session_state["budget"]["total"]
-
-        st.markdown("---")
-        section_title("Expense Tracker")
-        st.caption("Note down every payment you make and compare it with the estimate.")
-
-        ## Form to add one expense (the boxes are emptied after adding)
-        with st.form("expense_form", clear_on_submit=True):
-            what_for = st.text_input(
-                "What was the money spent on?", placeholder="e.g. advance paid to caterer"
-            )
-            f1, f2 = st.columns(2)
-            with f1:
-                category = st.selectbox("Category", list(budget_categories.keys()))
-            with f2:
-                amount = st.number_input("Amount Spent (₹)", min_value=0, value=0, step=500)
-            add_clicked = st.form_submit_button("Add Expense")
-
-        ## Check the expense (description typed, amount above 0) and save it with a capital first letter
-        if add_clicked:
-            if what_for.strip() == "":
-                st.error("Please write what the expense was for.")
-            elif amount <= 0:
-                st.error("Amount must be more than 0.")
-            else:
-                clean_what = what_for.strip()
-                clean_what = clean_what[0].upper() + clean_what[1:]
-                st.session_state["expenses"].append(
-                    {"id": st.session_state["next_expense_id"], "what": clean_what,
-                     "category": category, "amount": amount}
-                )
-                st.session_state["next_expense_id"] += 1
-                st.success("Expense added!")
-
-        ## Message from the last edit or delete (shown once)
-        message = st.session_state["expense_message"]
-        if message is not None:
-            if message[0] == "error":
-                st.error(message[1])
-            else:
-                st.success(message[1])
-            st.session_state["expense_message"] = None
-
-        expenses = st.session_state["expenses"]
-
-        if len(expenses) == 0:
-            st.info("No expenses added yet. Add your first one above.")
-        else:
-            ## Table of all expenses entered so far
-            section_title("Your Expenses")
-            st.table({
-                "No.": list(range(1, len(expenses) + 1)),
-                "Spent On": [e["what"] for e in expenses],
-                "Category": [e["category"] for e in expenses],
-                "Amount": [format_money(e["amount"]) for e in expenses],
-            })
-
-            ## Edit or remove any expense: choose the entry, change its details and update, or delete it
-            with st.expander("✏️ Edit or Remove an Expense"):
-                expense_ids = []
-                expense_labels = {}
-                for position, e in enumerate(expenses, start=1):
-                    expense_ids.append(e["id"])
-                    expense_labels[e["id"]] = f"{position}. {e['what']} · {format_money(e['amount'])}"
-
-                if st.session_state.get("manage_id") not in expense_ids:
-                    st.session_state["manage_id"] = expense_ids[0]
-
-                selected_id = st.selectbox(
-                    "Choose the entry", expense_ids,
-                    format_func=lambda i: expense_labels[i], key="manage_id",
-                )
-                for e in expenses:
-                    if e["id"] == selected_id:
-                        selected = e
-
-                with st.form("edit_expense_form"):
-                    st.text_input(
-                        "What was the money spent on?", value=selected["what"],
-                        key=f"edit_what_{selected_id}",
-                    )
-                    g1, g2 = st.columns(2)
-                    with g1:
-                        st.selectbox(
-                            "Category", list(budget_categories.keys()),
-                            index=list(budget_categories.keys()).index(selected["category"]),
-                            key=f"edit_cat_{selected_id}",
-                        )
-                    with g2:
-                        st.number_input(
-                            "Amount Spent (₹)", min_value=0, value=selected["amount"], step=500,
-                            key=f"edit_amt_{selected_id}",
-                        )
-                    st.form_submit_button(
-                        "Update Expense", on_click=update_expense, args=(selected_id,)
-                    )
-
-                st.button(
-                    "Delete This Expense", key="delete_expense",
-                    on_click=delete_expense, args=(selected_id,),
-                )
-
-            ## Add up the actual spending for each category
-            spent_by_category = {}
-            for name in budget_categories:
-                spent_by_category[name] = 0
-            for e in expenses:
-                spent_by_category[e["category"]] += e["amount"]
-            total_spent = sum(spent_by_category.values())
-            difference = budget_total - total_spent
-
-            ## Three summary cards: estimated, spent and remaining (or over budget)
-            t1, t2, t3 = st.columns(3)
-            t1.metric("Estimated Budget", format_money(budget_total))
-            t2.metric("Actual Spent", format_money(total_spent))
-            if difference >= 0:
-                t3.metric("Remaining", format_money(difference))
-            else:
-                t3.metric("Over Budget By", format_money(-difference))
-
-            ## Progress bar (capped at 100%)
-            used = total_spent / budget_total if budget_total > 0 else 0
-            st.progress(min(used, 1.0))
-            st.caption(f"{used * 100:.0f}% of the estimated budget used")
-
-            ## Overall budget alert: red above 100%, yellow from 80%, green otherwise
-            if used > 1:
-                st.error(f"🔴 You are over budget by {format_money(-difference)}.")
-            elif used >= 0.8:
-                st.warning(f"🟡 {used * 100:.0f}% of the budget is used. Spend carefully now.")
-            else:
-                st.success(f"🟢 Good going! {format_money(difference)} is still available.")
-
-            ## Budget vs actual table for each category with a status
-            section_title("Budget vs Actual")
-            cat_names, cat_planned, cat_spent, cat_diff, cat_status = [], [], [], [], []
-            for name, planned in budget_categories.items():
-                spent = spent_by_category[name]
-                cat_names.append(name)
-                cat_planned.append(format_money(planned))
-                cat_spent.append(format_money(spent))
-                if spent == 0 and planned == 0:
-                    cat_diff.append("-")
-                    cat_status.append("No spending")
-                elif spent > planned:
-                    cat_diff.append("-" + format_money(spent - planned))
-                    cat_status.append("🔴 Over budget")
-                elif spent == planned:
-                    cat_diff.append(format_money(0))
-                    cat_status.append("🟡 On budget")
-                else:
-                    cat_diff.append(format_money(planned - spent))
-                    cat_status.append("🟢 Under budget")
-            st.table({
-                "Category": cat_names,
-                "Estimated": cat_planned,
-                "Spent": cat_spent,
-                "Difference": cat_diff,
-                "Status": cat_status,
-            })
-
-            ## Buttons to undo mistakes: remove the last expense or clear all of them
-            b1, b2 = st.columns(2)
-            with b1:
-                if st.button("Remove Last Expense"):
-                    st.session_state["expenses"].pop()
-                    st.rerun()
-            with b2:
-                if st.button("Clear All Expenses"):
-                    st.session_state["expenses"] = []
-                    st.rerun()
-
 
 ## ---------------------------------------------------------------
-## 5. MENU PAGE
+## 6. PRICE LIST PAGE
 ## ---------------------------------------------------------------
 
-## Menu page: price list of venues, catering, decoration and add-ons, plus the discount rules
-def menu_page():
-    section_title("Our Menu and Price List")
-    st.caption("All prices are before discount and 18% GST.")
+## Price list page: venues, catering, decoration and add-ons, plus the discount rules
+def price_list_page():
+    page_header("Royal Price List", "All prices are before discount and 18% GST.")
 
     ## Venue prices
     with st.container(border=True):
@@ -1002,10 +946,243 @@ def menu_page():
 
 
 ## ---------------------------------------------------------------
-## 6. PROFILE PAGE
+## 7. EXPENSES PAGE (EXPENSE TRACKER)
 ## ---------------------------------------------------------------
 
-## Profile page: avatar, client details and the list of saved estimates
+## Expenses page: note down every payment and compare it with the estimate
+def expenses_page():
+    page_header("Expense Tracker", "Note down every payment you make and compare it with your estimate.")
+
+    ## The tracker needs a calculated budget, so ask the user to calculate one first
+    if "budget" not in st.session_state:
+        st.info("No budget yet. Calculate a budget on the Calculator page first, then come back here.")
+        st.button("🧮 Go to Calculator", key="go_calc", on_click=go_to, args=("Calculator",))
+        return
+
+    budget_categories = st.session_state["budget"]["categories"]
+    budget_total = st.session_state["budget"]["total"]
+
+    ## Form to add one expense (the boxes are emptied after adding)
+    with st.form("expense_form", clear_on_submit=True):
+        what_for = st.text_input(
+            "What was the money spent on?", placeholder="e.g. advance paid to caterer"
+        )
+        f1, f2 = st.columns(2)
+        with f1:
+            category = st.selectbox("Category", list(budget_categories.keys()))
+        with f2:
+            amount = st.number_input("Amount Spent (₹)", min_value=0, value=0, step=500)
+        add_clicked = st.form_submit_button("Add Expense")
+
+    ## Check the expense (description typed, amount above 0) and save it with a capital first letter
+    if add_clicked:
+        if what_for.strip() == "":
+            st.error("Please write what the expense was for.")
+        elif amount <= 0:
+            st.error("Amount must be more than 0.")
+        else:
+            clean_what = what_for.strip()
+            clean_what = clean_what[0].upper() + clean_what[1:]
+            st.session_state["expenses"].append(
+                {"id": st.session_state["next_expense_id"], "what": clean_what,
+                 "category": category, "amount": amount}
+            )
+            st.session_state["next_expense_id"] += 1
+            st.success("Expense added!")
+
+    ## Message from the last edit or delete (shown once)
+    message = st.session_state["expense_message"]
+    if message is not None:
+        if message[0] == "error":
+            st.error(message[1])
+        else:
+            st.success(message[1])
+        st.session_state["expense_message"] = None
+
+    expenses = st.session_state["expenses"]
+
+    if len(expenses) == 0:
+        st.info("No expenses added yet. Add your first one above.")
+        return
+
+    ## Table of all expenses entered so far
+    section_title("Your Expenses")
+    st.table({
+        "No.": list(range(1, len(expenses) + 1)),
+        "Spent On": [e["what"] for e in expenses],
+        "Category": [e["category"] for e in expenses],
+        "Amount": [format_money(e["amount"]) for e in expenses],
+    })
+
+    ## Edit or remove any expense: choose the entry, change its details and update, or delete it
+    with st.expander("✏️ Edit or Remove an Expense"):
+        expense_ids = []
+        expense_labels = {}
+        for position, e in enumerate(expenses, start=1):
+            expense_ids.append(e["id"])
+            expense_labels[e["id"]] = f"{position}. {e['what']} · {format_money(e['amount'])}"
+
+        if st.session_state.get("manage_id") not in expense_ids:
+            st.session_state["manage_id"] = expense_ids[0]
+
+        selected_id = st.selectbox(
+            "Choose the entry", expense_ids,
+            format_func=lambda i: expense_labels[i], key="manage_id",
+        )
+        for e in expenses:
+            if e["id"] == selected_id:
+                selected = e
+
+        with st.form("edit_expense_form"):
+            st.text_input(
+                "What was the money spent on?", value=selected["what"],
+                key=f"edit_what_{selected_id}",
+            )
+            g1, g2 = st.columns(2)
+            with g1:
+                st.selectbox(
+                    "Category", list(budget_categories.keys()),
+                    index=list(budget_categories.keys()).index(selected["category"]),
+                    key=f"edit_cat_{selected_id}",
+                )
+            with g2:
+                st.number_input(
+                    "Amount Spent (₹)", min_value=0, value=selected["amount"], step=500,
+                    key=f"edit_amt_{selected_id}",
+                )
+            st.form_submit_button(
+                "Update Expense", on_click=update_expense, args=(selected_id,)
+            )
+
+        st.button(
+            "Delete This Expense", key="delete_expense",
+            on_click=delete_expense, args=(selected_id,),
+        )
+
+    ## Add up the actual spending for each category
+    spent_by_category = {}
+    for name in budget_categories:
+        spent_by_category[name] = 0
+    for e in expenses:
+        spent_by_category[e["category"]] += e["amount"]
+    total_spent = sum(spent_by_category.values())
+    difference = budget_total - total_spent
+
+    ## Three summary cards: estimated, spent and remaining (or over budget)
+    t1, t2, t3 = st.columns(3)
+    t1.metric("Estimated Budget", format_money(budget_total))
+    t2.metric("Actual Spent", format_money(total_spent))
+    if difference >= 0:
+        t3.metric("Remaining", format_money(difference))
+    else:
+        t3.metric("Over Budget By", format_money(-difference))
+
+    ## Progress bar (capped at 100%)
+    used = total_spent / budget_total if budget_total > 0 else 0
+    st.progress(min(used, 1.0))
+    st.caption(f"{used * 100:.0f}% of the estimated budget used")
+
+    ## Overall budget alert: red above 100%, yellow from 80%, green otherwise
+    if used > 1:
+        st.error(f"🔴 You are over budget by {format_money(-difference)}.")
+    elif used >= 0.8:
+        st.warning(f"🟡 {used * 100:.0f}% of the budget is used. Spend carefully now.")
+    else:
+        st.success(f"🟢 Good going! {format_money(difference)} is still available.")
+
+    ## Budget vs actual table for each category with a status
+    section_title("Budget vs Actual")
+    cat_names, cat_planned, cat_spent, cat_diff, cat_status = [], [], [], [], []
+    for name, planned in budget_categories.items():
+        spent = spent_by_category[name]
+        cat_names.append(name)
+        cat_planned.append(format_money(planned))
+        cat_spent.append(format_money(spent))
+        if spent == 0 and planned == 0:
+            cat_diff.append("-")
+            cat_status.append("No spending")
+        elif spent > planned:
+            cat_diff.append("-" + format_money(spent - planned))
+            cat_status.append("🔴 Over budget")
+        elif spent == planned:
+            cat_diff.append(format_money(0))
+            cat_status.append("🟡 On budget")
+        else:
+            cat_diff.append(format_money(planned - spent))
+            cat_status.append("🟢 Under budget")
+    st.table({
+        "Category": cat_names,
+        "Estimated": cat_planned,
+        "Spent": cat_spent,
+        "Difference": cat_diff,
+        "Status": cat_status,
+    })
+
+    ## Buttons to undo mistakes: remove the last expense or clear all of them
+    b1, b2 = st.columns(2)
+    with b1:
+        if st.button("Remove Last Expense"):
+            st.session_state["expenses"].pop()
+            st.rerun()
+    with b2:
+        if st.button("Clear All Expenses"):
+            st.session_state["expenses"] = []
+            st.rerun()
+
+
+## ---------------------------------------------------------------
+## 8. SAVED ESTIMATES PAGE
+## ---------------------------------------------------------------
+
+## Saved page: one card for each estimate saved with the Save button, newest first
+def saved_page():
+    page_header("Saved Estimates", "Every estimate you saved from the Calculator, newest first.")
+
+    history = st.session_state["history"]
+    if len(history) == 0:
+        st.info("No saved estimates yet. Calculate a budget on the Calculator page and press Save Estimate.")
+        st.button("🧮 Go to Calculator", key="go_calc_saved", on_click=go_to, args=("Calculator",))
+        return
+
+    st.caption(f"{len(history)} saved estimate(s).")
+
+    for index in range(len(history) - 1, -1, -1):
+        item = history[index]
+        with st.expander(f"{item['name']}  ·  {format_money(item['total'])}"):
+            ## Details of the saved estimate
+            st.markdown(
+                f"- **Saved on:** {item['saved_on']}\n"
+                f"- **Booking ID:** {item['booking_id']}\n"
+                f"- **Client:** {item['name_text']}{item['place_text']} ({item['client_type']})\n"
+                f"- **Event:** {item['event_type']}, {item['event_time']}, "
+                f"{item['days']} day(s), {item['guests']} guests\n"
+                f"- **Venue / Menu / Decor:** {item['venue']} / {item['catering']} / {item['decor']}\n"
+                f"- **Add-ons:** {item['addons_text']}\n"
+                f"- **Budget rating:** {item['budget_rating']} ({format_money(item['cost_per_guest'])} per guest)"
+            )
+            ## Full cost breakdown of the saved estimate
+            with st.container(key=f"breakdown_saved_{index}"):
+                st.table({
+                    "Item": ["Venue", "Catering", "Decoration", "Add-ons",
+                             "Subtotal", f"Discount ({item['total_discount_percent']}%)",
+                             "GST (18%)", "TOTAL"],
+                    "Amount": [format_money(item["venue_cost"]), format_money(item["catering_cost"]),
+                               format_money(item["decor_cost"]), format_money(item["addon_cost"]),
+                               format_money(item["subtotal"]), "-" + format_money(item["discount_amount"]),
+                               format_money(item["gst"]), format_money(item["total"])],
+                })
+            ## Delete button for this saved estimate
+            st.button(
+                "Delete This Estimate", key=f"delete_{index}",
+                on_click=delete_estimate, args=(index,),
+            )
+
+
+## ---------------------------------------------------------------
+## 9. PROFILE PAGE
+## ---------------------------------------------------------------
+
+## Profile page: avatar and client details (used on the Calculator page)
 def profile_page():
 
     ## Avatar circle with the initials of the client name (first letter of first and last word)
@@ -1028,7 +1205,7 @@ def profile_page():
         unsafe_allow_html=True,
     )
 
-    ## Client details card: name, city, phone, email and client type (used on the Home page)
+    ## Client details card: name, city, phone, email and client type
     with st.container(border=True):
         section_title("My Details")
         st.text_input("Client Name", key="client_name", placeholder="e.g. rahul sharma")
@@ -1044,73 +1221,25 @@ def profile_page():
             "Client Type", client_types, key="client_type",
             help="Returning clients get 3% off and corporate clients get 5% off",
         )
-    st.caption("Your details are saved automatically and used on the Home page.")
-
-    ## Saved estimates: one card for each estimate saved with the Save button, newest first
-    section_title("Saved Estimates")
-    history = st.session_state["history"]
-    if len(history) == 0:
-        st.info("No saved estimates yet. Calculate a budget on the Home page and press Save Estimate.")
-    else:
-        st.caption(f"{len(history)} saved estimate(s), newest first.")
-
-        for index in range(len(history) - 1, -1, -1):
-            item = history[index]
-            with st.expander(f"{item['name']}  ·  {format_money(item['total'])}"):
-                ## Details of the saved estimate
-                st.markdown(
-                    f"- **Saved on:** {item['saved_on']}\n"
-                    f"- **Booking ID:** {item['booking_id']}\n"
-                    f"- **Client:** {item['name_text']}{item['place_text']} ({item['client_type']})\n"
-                    f"- **Event:** {item['event_type']}, {item['event_time']}, "
-                    f"{item['days']} day(s), {item['guests']} guests\n"
-                    f"- **Venue / Menu / Decor:** {item['venue']} / {item['catering']} / {item['decor']}\n"
-                    f"- **Add-ons:** {item['addons_text']}\n"
-                    f"- **Budget rating:** {item['budget_rating']} ({format_money(item['cost_per_guest'])} per guest)"
-                )
-                ## Full cost breakdown of the saved estimate
-                st.table({
-                    "Item": ["Venue", "Catering", "Decoration", "Add-ons",
-                             "Subtotal", f"Discount ({item['total_discount_percent']}%)",
-                             "GST (18%)", "TOTAL"],
-                    "Amount": [format_money(item["venue_cost"]), format_money(item["catering_cost"]),
-                               format_money(item["decor_cost"]), format_money(item["addon_cost"]),
-                               format_money(item["subtotal"]), "-" + format_money(item["discount_amount"]),
-                               format_money(item["gst"]), format_money(item["total"])],
-                })
-                ## Delete button for this saved estimate
-                st.button(
-                    "Delete This Estimate", key=f"delete_{index}",
-                    on_click=delete_estimate, args=(index,),
-                )
+    st.caption("Your details are saved automatically and used on the Calculator page.")
 
 
 ## ---------------------------------------------------------------
-## 7. SHOW THE SELECTED PAGE AND THE BOTTOM ICON BAR
+## 10. DRAW THE TOP BAR AND SHOW THE SELECTED PAGE
 ## ---------------------------------------------------------------
 
-## Show the page that is selected: Home, Menu or Profile
+## Top menu bar: always visible, the open page is underlined in gold
+top_nav()
+
+## Show the page that is selected
 current_page = st.session_state["page"]
-if current_page == "Home":
-    home_page()
-elif current_page == "Menu":
-    menu_page()
+if current_page == "Calculator":
+    calculator_page()
+elif current_page == "Price List":
+    price_list_page()
+elif current_page == "Expenses":
+    expenses_page()
+elif current_page == "Saved":
+    saved_page()
 else:
     profile_page()
-
-## Empty space at the end of every page, so the last button is never hidden by the bottom bar
-st.markdown('<div class="bottom-space"></div>', unsafe_allow_html=True)
-
-## Bottom icon bar: always visible, the open page is highlighted in violet
-with st.container(key="bottomnav"):
-    nav_columns = st.columns(len(pages))
-    for column, (page_name, icon) in zip(nav_columns, pages.items()):
-        with column:
-            st.button(
-                f"{icon} {page_name}",
-                key=f"nav_{page_name}",
-                on_click=go_to,
-                args=(page_name,),
-                type="primary" if current_page == page_name else "secondary",
-                use_container_width=True,
-            )
