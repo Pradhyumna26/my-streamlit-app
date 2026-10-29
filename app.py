@@ -27,6 +27,7 @@ venue_rates = {
 ## Catering cost per guest per day (in Rs.) for each menu type
 catering_rates = {
     "Veg": 900,
+    "Non-Veg": 1100,
     "Veg + Non-Veg": 1200,
 }
 
