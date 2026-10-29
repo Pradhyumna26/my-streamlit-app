@@ -461,10 +461,42 @@ st.markdown("""
     }
 
     /* ---------- SMALL SCREENS ---------- */
+    /* Centred button rows (hero buttons and the closing button), they wrap on small screens */
+    .st-key-herobtns { flex-direction: row !important; flex-wrap: wrap; justify-content: center; align-items: center; gap: 12px !important; }
+    .st-key-ctabtn { align-items: center; }
+    .st-key-herobtns [data-testid="stElementContainer"], .st-key-herobtns .element-container,
+    .st-key-ctabtn [data-testid="stElementContainer"], .st-key-ctabtn .element-container { width: auto !important; flex: 0 0 auto; }
+    .st-key-herobtns div.stButton > button, .st-key-ctabtn div.stButton > button { width: auto; min-width: 150px; }
+
+    /* Wide tables scroll sideways instead of breaking the page on phones */
+    .stApp [data-testid="stTable"] { overflow-x: auto; }
+
+    /* ---------- PHONE LAYOUT ---------- */
     @media (max-width: 640px) {
-        .block-container { padding-top: 9rem !important; }
-        .promo { font-size: 0.8rem; padding: 10px 12px; }
-        .st-key-topnav div.stButton > button { padding: 0.9rem 0.5rem; }
+        .block-container { padding-top: 9rem !important; padding-left: 1rem !important; padding-right: 1rem !important; }
+        .promo { font-size: 0.78rem; padding: 10px 12px; }
+
+        /* Top bar: hide the logo and shrink the links so all 5 links and the profile icon fit */
+        .st-key-topnav [data-testid="stHorizontalBlock"] { padding: 0 4px; }
+        .st-key-topnav [data-testid="stColumn"] { min-width: 0 !important; flex: 1 1 auto !important; }
+        .st-key-topnav [data-testid="stColumn"]:first-child { display: none; }
+        .st-key-topnav div.stButton > button { padding: 0.85rem 0.3rem; }
+        .st-key-topnav div.stButton > button p { font-size: 0.74rem; }
+        .st-key-nav_Profile div.stButton > button p { font-size: 1rem; }
+
+        /* Hero and buttons */
+        .hero { padding-top: 8px; }
+        .st-key-herobtns div.stButton > button, .st-key-ctabtn div.stButton > button { padding: 0.75rem 1.3rem; min-width: 150px; }
+        .st-key-hero_a div.stButton > button p, .st-key-hero_b div.stButton > button p { font-size: 0.98rem; }
+        .home-heading { margin-top: 48px; }
+        .cta-title { margin-top: 52px; }
+
+        /* Sample estimate card */
+        .showcase { padding: 18px; border-radius: 20px; }
+        .sc-right { text-align: left; }
+        .sc-label { width: 66px; font-size: 0.78rem; }
+        .sc-amt { width: 92px; font-size: 0.74rem; }
+        .sc-row { gap: 8px; }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -560,10 +592,8 @@ def home_page():
     </div>
     """, unsafe_allow_html=True)
 
-    hb0, hb1, hb2, hb3 = st.columns([1.6, 1.3, 1.3, 1.6])
-    with hb1:
+    with st.container(key="herobtns"):
         st.button("Calculate budget", key="hero_a", on_click=go_to, args=("Calculator",))
-    with hb2:
         st.button("View price list", key="hero_b", on_click=go_to, args=("Price List",))
 
     ## Sample estimate card: a real example worked out from the price lists above
@@ -686,8 +716,7 @@ def home_page():
         '<div class="cta-sub">Get your estimate in under a minute.</div>',
         unsafe_allow_html=True,
     )
-    cta0, cta1, cta2 = st.columns([1.8, 1.4, 1.8])
-    with cta1:
+    with st.container(key="ctabtn"):
         st.button("Calculate budget", key="cta_calc", on_click=go_to, args=("Calculator",))
 
     st.markdown(
