@@ -189,6 +189,13 @@ st.markdown("""
     html, body, .stApp, .stApp * { font-family: 'Inter', -apple-system, 'SF Pro Display', 'Segoe UI', sans-serif; }
     .stApp { color-scheme: dark; }
 
+    /* Keep Streamlit's icon font for icons (expander arrows, etc.), otherwise the icon name shows as text */
+    .stApp [data-testid="stIconMaterial"], .stApp [data-testid="stExpanderIcon"],
+    .stApp span[class*="material-symbols"], .stApp span[class*="material-icons"] {
+        font-family: 'Material Symbols Rounded', 'Material Symbols Outlined', 'Material Icons' !important;
+        letter-spacing: normal; text-transform: none; white-space: nowrap;
+    }
+
     /* Hide the default Streamlit header, menu and footer (our own top bar replaces them) */
     #MainMenu, footer { visibility: hidden; }
     header[data-testid="stHeader"], [data-testid="stToolbar"], [data-testid="stDecoration"] { display: none !important; }
@@ -497,6 +504,28 @@ st.markdown("""
         .sc-label { width: 66px; font-size: 0.78rem; }
         .sc-amt { width: 92px; font-size: 0.74rem; }
         .sc-row { gap: 8px; }
+        .tile-text { min-height: 0; }
+
+        /* Expander titles (saved estimates, edit expense) wrap instead of overlapping */
+        [data-testid="stExpander"] summary { gap: 8px; align-items: flex-start; }
+        [data-testid="stExpander"] summary p { white-space: normal !important; overflow-wrap: anywhere; line-height: 1.35; font-size: 0.95rem; }
+
+        /* Metric cards: smaller numbers that wrap, never cut off or overlap */
+        [data-testid="stMetricValue"], [data-testid="stMetricValue"] * {
+            font-size: 1.45rem !important; white-space: normal !important; overflow: visible !important;
+            text-overflow: clip !important; overflow-wrap: anywhere;
+        }
+        [data-testid="stMetricLabel"], [data-testid="stMetricLabel"] * { white-space: normal !important; }
+
+        /* Tables: smaller text and tighter cells */
+        .stApp th, .stApp td { font-size: 0.8rem; padding: 0.4rem 0.5rem !important; }
+
+        /* Buttons with long names wrap onto two lines */
+        div.stButton > button p, [data-testid="stFormSubmitButton"] > button p { white-space: normal; line-height: 1.25; }
+
+        /* Cards, alerts and captions never push past the screen edge */
+        [data-testid="stAlert"] *, [data-testid="stCaptionContainer"] p, .stApp li { overflow-wrap: anywhere; }
+        [data-testid="stVerticalBlockBorderWrapper"] { padding: 0.2rem; }
     }
 </style>
 """, unsafe_allow_html=True)
