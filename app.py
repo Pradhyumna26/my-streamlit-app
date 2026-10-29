@@ -1,8 +1,8 @@
 ## Event Budget Calculator (business idea: Event Management)
 ## Run with: streamlit run app.py
 ## Needs Python 3.10 or newer (match-case is used) and a recent Streamlit: pip install --upgrade streamlit
-## The app has a TOP menu bar (Apple-style black bar) with 5 pages:
-##   Calculator, Price List, Expenses, Saved and Profile
+## The app has a TOP menu bar (Apple-style black bar) with 6 pages:
+##   Home, Calculator, Price List, Expenses, Saved and Profile
 
 
 ## Import the libraries: html (safe text for the avatar), datetime (save time), pandas (chart data), streamlit (the app)
@@ -59,7 +59,7 @@ mobile_start_digits = ["6", "7", "8", "9"]
 planning_keywords = ["music", "band", "flower", "stage", "fireworks", "photo"]
 
 ## The menu links shown in the top bar (the Profile icon sits on the right side of the bar)
-nav_pages = ["Calculator", "Price List", "Expenses", "Saved"]
+nav_pages = ["Home", "Calculator", "Price List", "Expenses", "Saved"]
 
 
 ## ---------------------------------------------------------------
@@ -89,7 +89,7 @@ def section_title(text):
     st.markdown(f'<div class="section-title">{text}</div>', unsafe_allow_html=True)
 
 
-## Show the title of a page (used on every page except the Calculator, which has the big hero)
+## Show the title of a page (used on every page except Home, which has the big hero)
 def page_header(title, subtitle):
     st.markdown(
         f'<div class="page-header"><h2>{title}</h2><p>{subtitle}</p></div>',
@@ -391,6 +391,75 @@ st.markdown("""
     .profile-name { text-align: center; color: #f5f5f7; font-weight: 700; font-size: 1.4rem; letter-spacing: -0.02em; }
     .profile-sub { text-align: center; color: #86868b; font-size: 0.88rem; margin-bottom: 12px; }
 
+    /* ---------- HOME PAGE ---------- */
+    .home-heading {
+        text-align: center; color: #f5f5f7; font-weight: 700; letter-spacing: -0.03em;
+        font-size: clamp(1.7rem, 5vw, 2.6rem); line-height: 1.1; margin: 64px 0 8px 0;
+    }
+    .home-sub { text-align: center; color: #86868b; font-size: 1.1rem; margin-bottom: 26px; }
+
+    /* Sample estimate card under the hero (like the MacBook picture in the Apple page) */
+    .showcase {
+        max-width: 760px; margin: 34px auto 6px auto; padding: 26px;
+        background: linear-gradient(180deg, #19191c 0%, #0c0c0e 100%);
+        border: 1px solid #2c2c30; border-radius: 24px;
+        box-shadow: 0 30px 90px rgba(46,91,255,0.28);
+    }
+    .sc-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; flex-wrap: wrap; margin-bottom: 8px; }
+    .sc-title { color: #f5f5f7; font-weight: 600; font-size: 1.05rem; }
+    .sc-sub { color: #86868b; font-size: 0.85rem; margin-top: 4px; }
+    .sc-total { color: #ffffff; font-weight: 700; letter-spacing: -0.03em; font-size: clamp(1.8rem, 5.5vw, 2.8rem); line-height: 1.05; }
+    .sc-right { text-align: right; }
+    .sc-row { display: flex; align-items: center; gap: 12px; margin-top: 14px; }
+    .sc-label { width: 92px; color: #c7c7cc; font-size: 0.86rem; flex: 0 0 auto; }
+    .sc-bar { flex: 1 1 auto; height: 10px; background: #222226; border-radius: 99px; overflow: hidden; }
+    .sc-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #2e5bff, #7a9bff); }
+    .sc-amt { width: 112px; text-align: right; color: #f5f5f7; font-size: 0.86rem; flex: 0 0 auto; font-variant-numeric: tabular-nums; }
+
+    /* Feature tiles */
+    .tile-big {
+        font-size: clamp(1.7rem, 4vw, 2.2rem); font-weight: 700; letter-spacing: -0.03em; line-height: 1.1;
+        background: linear-gradient(90deg, #f5f5f7, #7a9bff); -webkit-background-clip: text;
+        background-clip: text; -webkit-text-fill-color: transparent; margin: 6px 0 10px 0;
+    }
+    .tile-title { color: #f5f5f7; font-weight: 600; font-size: 1.15rem; margin-bottom: 6px; }
+    .tile-text { color: #a1a1a6; font-size: 0.98rem; line-height: 1.5; margin-bottom: 8px; min-height: 3.2em; }
+    [class*="st-key-tile_"] div.stButton > button {
+        background: transparent; width: auto; padding: 0.2rem 0; border-radius: 0; box-shadow: none;
+    }
+    [class*="st-key-tile_"] div.stButton > button p { color: #2997ff !important; font-weight: 500; font-size: 1rem; }
+    [class*="st-key-tile_"] div.stButton > button:hover { background: transparent; }
+    [class*="st-key-tile_"] div.stButton > button:hover p { text-decoration: underline; }
+
+    /* How it works */
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .step { background: #111113; border: 1px solid #2c2c30; border-radius: 18px; padding: 24px; }
+    .step-num {
+        width: 34px; height: 34px; border-radius: 50%; background: #2e5bff; color: #ffffff;
+        display: flex; align-items: center; justify-content: center; font-weight: 700; margin-bottom: 14px;
+    }
+    .step-title { color: #f5f5f7; font-weight: 600; font-size: 1.1rem; margin-bottom: 6px; }
+    .step-text { color: #a1a1a6; font-size: 0.95rem; line-height: 1.5; }
+
+    /* Event types */
+    .events { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .event { background: #111113; border: 1px solid #2c2c30; border-radius: 18px; padding: 20px; }
+    .event-name { color: #f5f5f7; font-weight: 600; font-size: 1.05rem; margin-bottom: 6px; }
+    .event-text { color: #a1a1a6; font-size: 0.9rem; line-height: 1.45; }
+
+    /* Closing call to action */
+    .cta-title {
+        text-align: center; color: #f5f5f7; font-weight: 700; letter-spacing: -0.03em;
+        font-size: clamp(1.8rem, 5vw, 2.8rem); line-height: 1.1; margin: 70px 0 8px 0;
+    }
+    .cta-sub { text-align: center; color: #86868b; font-size: 1.1rem; margin-bottom: 22px; }
+    .home-foot { text-align: center; color: #6e6e73; font-size: 0.8rem; margin-top: 46px; }
+
+    @media (max-width: 800px) {
+        .steps { grid-template-columns: 1fr; }
+        .events { grid-template-columns: repeat(2, 1fr); }
+    }
+
     /* ---------- SMALL SCREENS ---------- */
     @media (max-width: 640px) {
         .block-container { padding-top: 9rem !important; }
@@ -402,7 +471,7 @@ st.markdown("""
 
 ## Keep typed values when you move to another page (Streamlit forgets a widget value when its page is not shown)
 defaults = {
-    "page": "Calculator",
+    "page": "Home",
     "history": [],
     "asking_name": False,
     "save_name": "",
@@ -433,7 +502,7 @@ for e in st.session_state["expenses"]:
 ## 4. TOP MENU BAR
 ## ---------------------------------------------------------------
 
-## Fixed black bar at the top: crown logo, four menu links, a Profile icon, and a promo strip underneath
+## Fixed black bar at the top: crown logo, five menu links, a Profile icon, and a promo strip underneath
 def top_nav():
     current = st.session_state["page"]
     saved_count = len(st.session_state["history"])
@@ -445,13 +514,13 @@ def top_nav():
     )
 
     with st.container(key="topnav"):
-        ## 1 logo + 4 menu links + 1 profile icon, all spread evenly across the bar
-        cols = st.columns([0.7, 1, 1, 1, 1, 0.7])
+        ## 1 logo + 5 menu links + 1 profile icon, all spread evenly across the bar
+        cols = st.columns([0.7, 1, 1, 1, 1, 1, 0.7])
 
         with cols[0]:
             st.markdown(f'<div class="brand">{crown_svg}</div>', unsafe_allow_html=True)
 
-        for column, page_name in zip(cols[1:5], nav_pages):
+        for column, page_name in zip(cols[1:6], nav_pages):
             with column:
                 label = page_name
                 if page_name == "Saved" and saved_count > 0:
@@ -461,7 +530,7 @@ def top_nav():
                     type="primary" if current == page_name else "secondary",
                 )
 
-        with cols[5]:
+        with cols[6]:
             st.button(
                 "👤", key="nav_Profile", help="Profile", on_click=go_to, args=("Profile",),
                 type="primary" if current == "Profile" else "secondary",
@@ -473,6 +542,158 @@ def top_nav():
             'Save up to <b>30%</b> on bulk, returning and corporate bookings.</div>',
             unsafe_allow_html=True,
         )
+
+
+## ---------------------------------------------------------------
+## 4B. HOME PAGE (Apple-style landing page)
+## ---------------------------------------------------------------
+
+## Home page: hero, sample estimate, feature tiles, how it works, event types and a closing call to action
+def home_page():
+
+    ## Big centred hero with two pill buttons (like Learn more / Pre-order)
+    st.markdown("""
+    <div class="hero">
+        <h1>Event Budget Calculator</h1>
+        <p class="hero-sub">Know the cost before you book.</p>
+        <p class="hero-note">Instant estimates for weddings, parties, corporate events and conferences.</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    hb0, hb1, hb2, hb3 = st.columns([1.6, 1.3, 1.3, 1.6])
+    with hb1:
+        st.button("Calculate budget", key="hero_a", on_click=go_to, args=("Calculator",))
+    with hb2:
+        st.button("View price list", key="hero_b", on_click=go_to, args=("Price List",))
+
+    ## Sample estimate card: a real example worked out from the price lists above
+    sample_guests = 200
+    sample_days = 2
+    sample_rows = [
+        ("Venue", venue_rates["Banquet Hall"] * sample_days),
+        ("Catering", catering_rates["Veg"] * sample_guests * sample_days),
+        ("Decor", decor_rates["Floral"] * sample_days),
+        ("DJ & Sound", addon_rates["DJ & Sound System"] * sample_days),
+    ]
+    sample_subtotal = sum(cost for label, cost in sample_rows)
+    sample_discount_percent = 5
+    sample_total = sample_subtotal * (100 - sample_discount_percent) / 100 * (1 + GST_RATE)
+    biggest_cost = max(cost for label, cost in sample_rows)
+
+    bars_html = ""
+    for label, cost in sample_rows:
+        width = round(cost / biggest_cost * 100)
+        bars_html += (
+            f'<div class="sc-row"><div class="sc-label">{label}</div>'
+            f'<div class="sc-bar"><div class="sc-fill" style="width:{width}%"></div></div>'
+            f'<div class="sc-amt">{format_money(cost)}</div></div>'
+        )
+
+    st.markdown(
+        '<div class="showcase"><div class="sc-head"><div>'
+        f'<div class="sc-title">Wedding · {sample_guests} guests · {sample_days} days</div>'
+        '<div class="sc-sub">Banquet Hall, Veg menu, Floral decor and DJ. A sample estimate.</div></div>'
+        f'<div class="sc-right"><div class="sc-total">{format_money(sample_total)}</div>'
+        f'<div class="sc-sub">After {sample_discount_percent}% discount and 18% GST</div></div></div>'
+        + bars_html + '</div>',
+        unsafe_allow_html=True,
+    )
+
+    ## Feature tiles: four cards, each with a link to the matching page
+    st.markdown(
+        '<div class="home-heading">Everything you need to plan the budget.</div>'
+        '<div class="home-sub">From the first estimate to the last payment.</div>',
+        unsafe_allow_html=True,
+    )
+
+    tile_row1 = st.columns(2)
+    with tile_row1[0]:
+        with st.container(border=True):
+            st.markdown(
+                '<div class="tile-big">GST included</div>'
+                '<div class="tile-title">Instant estimate</div>'
+                '<div class="tile-text">Venue, catering, decoration and add-ons are added up in a second, with discount and 18% GST.</div>',
+                unsafe_allow_html=True,
+            )
+            st.button("Open calculator ›", key="tile_calc", on_click=go_to, args=("Calculator",))
+    with tile_row1[1]:
+        with st.container(border=True):
+            st.markdown(
+                f'<div class="tile-big">Up to {MAX_DISCOUNT_PERCENT}% off</div>'
+                '<div class="tile-title">Smart discounts</div>'
+                '<div class="tile-text">Bulk bookings, returning clients and corporate clients all get a better price.</div>',
+                unsafe_allow_html=True,
+            )
+            st.button("See the price list ›", key="tile_prices", on_click=go_to, args=("Price List",))
+
+    tile_row2 = st.columns(2)
+    with tile_row2[0]:
+        with st.container(border=True):
+            st.markdown(
+                '<div class="tile-big">Budget vs actual</div>'
+                '<div class="tile-title">Expense tracker</div>'
+                '<div class="tile-text">Note down every payment and see at once if you are under or over the estimate.</div>',
+                unsafe_allow_html=True,
+            )
+            st.button("Track expenses ›", key="tile_expenses", on_click=go_to, args=("Expenses",))
+    with tile_row2[1]:
+        with st.container(border=True):
+            st.markdown(
+                '<div class="tile-big">Every option</div>'
+                '<div class="tile-title">Save and compare</div>'
+                '<div class="tile-text">Save each estimate with a name, then open them side by side to pick the best plan.</div>',
+                unsafe_allow_html=True,
+            )
+            st.button("View saved estimates ›", key="tile_saved", on_click=go_to, args=("Saved",))
+
+    ## How it works: three steps in order
+    st.markdown(
+        '<div class="home-heading">Three steps. That is all.</div>'
+        '<div class="home-sub">No forms to print and no calls to make.</div>',
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        '<div class="steps">'
+        '<div class="step"><div class="step-num">1</div><div class="step-title">Add your details</div>'
+        '<div class="step-text">Put your name, city and client type on the Profile page. Returning and corporate clients get extra discount.</div></div>'
+        '<div class="step"><div class="step-num">2</div><div class="step-title">Describe your event</div>'
+        '<div class="step-text">Choose the event, guests, days, venue, menu, decor and add-ons, then press Calculate Budget.</div></div>'
+        '<div class="step"><div class="step-num">3</div><div class="step-title">Track every rupee</div>'
+        '<div class="step-text">Save the estimate and log each payment on the Expenses page as the event comes together.</div></div>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
+    ## Event types the calculator is made for
+    st.markdown(
+        '<div class="home-heading">Made for every kind of event.</div>'
+        '<div class="home-sub">Pick one and the calculator adds a tip for it.</div>',
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        '<div class="events">'
+        '<div class="event"><div class="event-name">Wedding</div><div class="event-text">Extra days for mehendi, sangeet and the wedding itself.</div></div>'
+        '<div class="event"><div class="event-name">Birthday Party</div><div class="event-text">A simple theme and return gifts go a long way.</div></div>'
+        '<div class="event"><div class="event-name">Corporate Event</div><div class="event-text">Good sound and a proper stage matter most.</div></div>'
+        '<div class="event"><div class="event-name">Conference</div><div class="event-text">Seating, stage and sound set-up for every session.</div></div>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
+    ## Closing call to action
+    st.markdown(
+        '<div class="cta-title">Ready to plan your event?</div>'
+        '<div class="cta-sub">Get your estimate in under a minute.</div>',
+        unsafe_allow_html=True,
+    )
+    cta0, cta1, cta2 = st.columns([1.8, 1.4, 1.8])
+    with cta1:
+        st.button("Calculate budget", key="cta_calc", on_click=go_to, args=("Calculator",))
+
+    st.markdown(
+        '<div class="home-foot">All prices are before discount and 18% GST.</div>',
+        unsafe_allow_html=True,
+    )
 
 
 ## ---------------------------------------------------------------
@@ -575,23 +796,10 @@ def show_estimate():
     st.caption("Next step: open the Expenses page to track every payment against this estimate.")
 
 
-## Calculator page: hero, event inputs, Calculate button and estimate display
+## Calculator page: event inputs, Calculate button and estimate display
 def calculator_page():
 
-    ## Big centred hero (only on this page), then two pill buttons like Learn more / Pre-order
-    st.markdown("""
-    <div class="hero">
-        <h1>Event Budget Calculator</h1>
-        <p class="hero-sub">Plan your event in minutes</p>
-        <p class="hero-note">Weddings, parties, corporate events and conferences</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-    hb0, hb1, hb2, hb3 = st.columns([1.6, 1.3, 1.3, 1.6])
-    with hb1:
-        st.button("View price list", key="hero_a", on_click=go_to, args=("Price List",))
-    with hb2:
-        st.button("Track expenses", key="hero_b", on_click=go_to, args=("Expenses",))
+    page_header("Budget Calculator", "Tell us about your event and get an instant estimate.")
 
     ## Reminder to fill the Profile page when no client name is saved yet
     if st.session_state["client_name"].strip() == "":
@@ -1218,7 +1426,9 @@ top_nav()
 
 ## Show the page that is selected
 current_page = st.session_state["page"]
-if current_page == "Calculator":
+if current_page == "Home":
+    home_page()
+elif current_page == "Calculator":
     calculator_page()
 elif current_page == "Price List":
     price_list_page()
