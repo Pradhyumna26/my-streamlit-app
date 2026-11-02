@@ -590,6 +590,21 @@ st.markdown("""
     .st-key-sitefooter div.stButton > button:hover { background: transparent; }
     .st-key-sitefooter div.stButton > button:hover p { color: #ffffff !important; text-decoration: underline; }
 
+    /* Add-on rows: a small icon tile beside each checkbox (kept side by side on phones too) */
+    .addon-icon {
+        width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+        background: rgba(46, 91, 255, 0.12); border: 1px solid #26314f; color: #7a9bff;
+    }
+    .addon-icon svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7;
+                      stroke-linecap: round; stroke-linejoin: round; }
+    .st-key-addons [data-testid="stHorizontalBlock"] { flex-wrap: nowrap !important; gap: 12px; margin-bottom: 4px; }
+    .st-key-addons [data-testid="stColumn"]:first-child, .st-key-addons [data-testid="column"]:first-child {
+        flex: 0 0 44px !important; min-width: 44px !important; width: 44px !important;
+    }
+    .st-key-addons [data-testid="stColumn"]:last-child, .st-key-addons [data-testid="column"]:last-child {
+        flex: 1 1 0 !important; min-width: 0 !important; width: auto !important;
+    }
+
     /* About, FAQ and Contact pages */
     .about-lead { color: #c7c7cc; font-size: 1.05rem; line-height: 1.65; margin-bottom: 6px; }
     .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 18px 0 8px 0; }
@@ -1089,6 +1104,30 @@ def contact_page():
             st.button("View price list", key="contact_price", on_click=go_to, args=("Price List",), use_container_width=True)
 
 
+## Simple line icons for the add-on services (drawn in code, so no image files are needed)
+addon_icons = {
+    "dj": '<path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/>'
+          '<circle cx="12" cy="14.5" r="3.5"/><circle cx="12" cy="7.5" r="1"/>',
+    "photo": '<path d="M5 7h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z"/>'
+             '<path d="M8 7l1.5-3h5L16 7"/><circle cx="12" cy="13.5" r="3.5"/>',
+    "stage": '<path d="M8 3h8l2 6H6z"/><path d="M7 13l-3 7M12 13v7M17 13l3 7"/>',
+    "gift": '<rect x="4" y="10" width="16" height="11" rx="1"/><rect x="3" y="7" width="18" height="3" rx="1"/>'
+            '<path d="M12 7v14"/><path d="M12 7c-2-3-5-3-5-1s3 1 5 1zM12 7c2-3 5-3 5-1s-3 1-5 1z"/>',
+}
+
+
+## One add-on row: icon tile on the left, checkbox on the right. Returns True when it is ticked.
+def addon_row(icon_name, label, key):
+    icon_col, box_col = st.columns([1, 12], vertical_alignment="center")
+    with icon_col:
+        st.markdown(
+            f'<div class="addon-icon"><svg viewBox="0 0 24 24">{addon_icons[icon_name]}</svg></div>',
+            unsafe_allow_html=True,
+        )
+    with box_col:
+        return st.checkbox(label, key=key)
+
+
 ## ---------------------------------------------------------------
 ## 5. CALCULATOR PAGE: SAVE AREA, ESTIMATE DISPLAY AND MAIN FUNCTION
 ## ---------------------------------------------------------------
@@ -1230,10 +1269,11 @@ def calculator_page():
     with st.container(border=True):
         section_title("Add-on Services")
 
-        want_dj = st.checkbox("DJ & Sound System (+₹25,000/day)", key="want_dj")
-        want_photo = st.checkbox("Photography & Videography (+₹40,000/day)", key="want_photo")
-        want_stage = st.checkbox("Stage & Lighting (+₹30,000/day)", key="want_stage")
-        want_gifts = st.checkbox("Return Gifts (+₹150/guest)", key="want_gifts")
+        with st.container(key="addons"):
+            want_dj = addon_row("dj", "DJ & Sound System (+₹25,000/day)", "want_dj")
+            want_photo = addon_row("photo", "Photography & Videography (+₹40,000/day)", "want_photo")
+            want_stage = addon_row("stage", "Stage & Lighting (+₹30,000/day)", "want_stage")
+            want_gifts = addon_row("gift", "Return Gifts (+₹150/guest)", "want_gifts")
 
         special_requests = st.text_area(
             "Special Requests (optional)", key="special_requests",
