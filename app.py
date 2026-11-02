@@ -963,7 +963,7 @@ def site_footer():
             )
 
         st.markdown(
-            '<div class="ft-copy">© 2026 Eventora. All prices are before discount and 18% GST.</div>',
+            '<div class="ft-copy">© 2026 Eventora. All rights reserved.</div>',
             unsafe_allow_html=True,
         )
 
